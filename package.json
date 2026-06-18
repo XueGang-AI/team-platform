@@ -1,0 +1,32 @@
+{
+  "name": "team-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "团队统一项目治理平台 - Phase 1 工程骨架",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:infra": "docker compose up -d",
+    "stop:infra": "docker compose down",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test --filter=!@team-platform/e2e",
+    "test:integration": "turbo run test:integration",
+    "test:e2e": "pnpm --filter @team-platform/e2e test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.5.0",
+    "globals": "^17.0.0",
+    "prettier": "^3.8.4",
+    "turbo": "^2.9.18",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
+  }
+}

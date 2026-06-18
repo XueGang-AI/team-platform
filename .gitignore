@@ -14,6 +14,10 @@ out/
 # ---------- 测试与覆盖率 ----------
 coverage/
 .nyc_output/
+# Playwright 运行产物
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+tests/e2e/blob-report/
 
 # ---------- 环境变量与密钥 ----------
 .env
@@ -47,6 +51,8 @@ Thumbs.db
 # ---------- Prisma ----------
 # 仅忽略生成产物，schema 和迁移必须提交
 packages/*/prisma/generated/
+packages/*/src/generated/
+apps/api/src/generated/
 
 # ---------- Docker ----------
 # 本地数据卷不提交

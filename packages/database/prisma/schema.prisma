@@ -1,0 +1,21 @@
+// Prisma schema - team-platform 控制面
+//
+// Phase 1：仅建立基础设施连接，不创建任何业务表。
+// Project / User / Service / Environment / Deployment / Alert 等业务模型
+// 在 Phase 2 起按需通过 `prisma migrate dev` 增量引入。
+//
+// Prisma 7：datasource.url 已从 schema 移除，连接串通过 prisma.config.ts
+// 提供，运行时通过 @prisma/adapter-pg driver adapter 注入 PrismaClient。
+//
+// 生成产物输出到 apps/api/src/generated/prisma（不入库），由 API 直接消费。
+// 生成 ESM 代码以匹配 Prisma 7 默认 moduleFormat。
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../../../apps/api/src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}

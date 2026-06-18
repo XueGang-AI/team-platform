@@ -22,23 +22,30 @@ flowchart LR
     P11 --> P12[Phase 12 Prompt 版本与模型评测]
 ```
 
-## Phase 0：架构与仓库初始化（当前阶段）
+## Phase 0：架构与仓库初始化（已完成）
 
 - **目标**：完成仓库初始化、需求梳理、总体架构与路线规划。
 - **前置条件**：无。
 - **核心交付物**：Git 仓库、README、CLAUDE.md、docs 目录与架构文档、ADR。
-- **验收标准**：见任务清单第十四节验收标准；文档一致、无敏感信息、已提交并尝试推送。
+- **验收标准**：文档一致、无敏感信息、已提交并推送。
 - **不做什么**：不初始化工程骨架、不写业务代码、不部署服务。
 - **主要风险**：范围理解偏差 → 通过明确边界文档控制。
 
-## Phase 1：工程骨架与本地基础设施
+## Phase 1：工程骨架与本地基础设施（已完成）
 
-- **目标**：建立 monorepo 骨架，本地起 PostgreSQL / Redis / 可观测性组件。
+- **目标**：建立 monorepo 骨架，本地起 PostgreSQL / Redis，提供真实可运行的管理后台与 API。
 - **前置条件**：Phase 0 完成。
-- **核心交付物**：pnpm workspace + Turborepo 结构、NestJS API 空骨架、Next.js admin 空骨架、Prisma 基础 schema、Docker Compose 编排、CI 基础 lint/typecheck。
-- **验收标准**：`docker compose up` 可起基础设施；API 与 admin 可启动；lint/typecheck 通过。
-- **不做什么**：不实现业务模块、不做登录、不做页面。
-- **主要风险**：依赖版本选择不当 → 通过官方文档验证锁定。
+- **核心交付物**：pnpm workspace + Turborepo 结构、NestJS API（健康检查/版本/请求 ID/结构化日志/配置校验/OpenAPI/CORS/优雅关闭/PG/Redis 连接）、Next.js 管理后台（真实状态展示 + 降级）、Prisma 7 driver adapter 基础、Docker Compose（仅 PG+Redis）、GitHub Actions CI、单元 + 集成 + Playwright E2E 测试。
+- **验收标准**：`docker compose up` 起基础设施；API 与 Web 可启动；live/ready/version 真实工作；依赖失败正确降级；lint/typecheck/test/integration/build/E2E 全通过；CI workflow 已创建。
+- **不做什么**：不实现业务模块、不做登录、不做可观测性组件（Loki/Prometheus/Tempo/Grafana 在 Phase 4）。
+- **主要风险**：依赖版本选择不当 → 已通过官方文档验证锁定；本机已安装的 PG/Redis 占用 5432/6379 → Docker 宿主端口改用 5433/6380 避开冲突。
+
+## Phase 1.5：系统级目录架构审计与收敛（规划中，待启动）
+
+- **目标**：审计 Phase 1 产生的目录结构、空包、重复配置、依赖方向，做收敛调整。
+- **前置条件**：Phase 1 完成。
+- **核心交付物**：目录结构收敛方案与实施（由用户单独下发指令启动）。
+- **不做什么**：不进入 Phase 2 业务开发。
 
 ## Phase 2：项目注册与服务目录
 

@@ -16,7 +16,7 @@
 
 ## 2. 当前项目目标
 
-构建团队统一项目治理平台。**当前阶段为 Phase 0（架构与仓库初始化），已完成。** 下一阶段由用户明确指令启动，不得自行进入 Phase 1。
+构建团队统一项目治理平台。**当前阶段为 Phase 1（工程骨架与本地开发基础设施），已完成。** 下一阶段为 Phase 1.5（系统级目录架构审计与收敛），由用户明确指令启动，不得自行进入 Phase 2 或后续 Phase。
 
 ## 3. 当前架构
 
@@ -33,20 +33,22 @@
 
 ## 5. 技术栈
 
-| 维度 | 选型 |
-|------|------|
-| Monorepo | pnpm workspace + Turborepo |
-| 管理后台 | Next.js + TypeScript |
-| API | NestJS |
-| 数据库 | PostgreSQL |
-| ORM | Prisma |
-| 缓存/队列 | Redis |
-| 可观测性 | OpenTelemetry + Prometheus + Grafana + Loki + Tempo |
-| 本地基础设施 | Docker Compose |
-| API 描述 | OpenAPI |
-| 测试 | 单元 + 集成 + Playwright E2E |
+| 维度 | 选型 | 锁定版本（Phase 1） |
+|------|------|------|
+| Monorepo | pnpm workspace + Turborepo | pnpm 11.7.0 / Turbo 2.9.18 |
+| 管理后台 | Next.js + TypeScript | Next 16.2.9 / React 19.2.7 / TS 6.0.3 |
+| API | NestJS（Express adapter） | NestJS 11.1.27 |
+| 数据库 | PostgreSQL | postgres:16-alpine |
+| ORM | Prisma（driver adapter） | Prisma 7.8.0 + @prisma/adapter-pg |
+| 缓存/队列 | Redis | redis:7-alpine / ioredis 5.11.1 |
+| 结构化日志 | pino + nestjs-pino | pino 10.3.1 / nestjs-pino 4.6.1 |
+| 配置校验 | zod | 4.4.3 |
+| 可观测性 | OpenTelemetry + Prometheus + Grafana + Loki + Tempo | Phase 4 引入 |
+| 本地基础设施 | Docker Compose | 仅 PG + Redis |
+| API 描述 | OpenAPI（Swagger） | @nestjs/swagger 11.4.4 |
+| 测试 | Jest + Playwright E2E | Jest 30.4.2 / Playwright 1.61.0 |
 
-精确版本在 Phase 1 通过官方文档验证后锁定，不凭记忆编造版本号。详见 [docs/04-technology-decisions.md](./docs/04-technology-decisions.md)。
+精确版本已通过 npm registry 与 Context7 在 Phase 1 验证锁定。详见 [docs/04-technology-decisions.md](./docs/04-technology-decisions.md)。
 
 ## 6. 命名规范
 

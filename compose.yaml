@@ -1,0 +1,45 @@
+# Phase 1 本地基础设施：仅 PostgreSQL + Redis
+# 可观测性组件（Loki/Prometheus/Tempo/Grafana 等）在 Phase 4 引入。
+name: team-platform
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: team-platform-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: team_platform
+      POSTGRES_PASSWORD: team_platform
+      POSTGRES_DB: team_platform
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U team_platform -d team_platform']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: team-platform-redis
+    restart: unless-stopped
+    command: ['redis-server', '--save', '60', '1', '--loglevel', 'warning']
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  postgres_data:
+    name: team-platform-postgres-data
+  redis_data:
+    name: team-platform-redis-data

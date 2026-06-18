@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+.next/
+out/
+.turbo/
+coverage/
+*.tsbuildinfo
+pnpm-lock.yaml
+packages/*/prisma/generated/
+packages/*/src/generated/
+apps/api/src/generated/
+infra/data/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+apps/web/next-env.d.ts
+apps/web/.next/
+
+# Markdown 不强制 prettier 格式化（保留 Phase 0 文档原貌）
+*.md
+docs/

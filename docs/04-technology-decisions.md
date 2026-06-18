@@ -1,7 +1,29 @@
 # 04 - 技术选型
 
 > 本文记录平台关键技术选型的最终建议、理由、替代方案与已知风险。
-> Phase 0 不锁定所有依赖的精确版本，版本号在 Phase 1 工程骨架落地时通过官方文档验证后确定。
+> Phase 1 已通过 npm registry 与 Context7 验证并锁定精确版本（见 CLAUDE.md 技术栈表）。
+
+## 0. Phase 1 已落地版本
+
+Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm registry `npm view` + Context7 官方文档）：
+
+| 维度 | 选型 | 锁定版本 |
+|------|------|---------|
+| Node.js | LTS | 24（.nvmrc） |
+| 包管理 | pnpm workspace | 11.7.0 |
+| Monorepo 编排 | Turborepo | 2.9.18 |
+| TypeScript | — | 6.0.3 |
+| 管理后台 | Next.js + React | 16.2.9 / 19.2.7 |
+| 平台 API | NestJS（Express adapter） | 11.1.27 |
+| API 文档 | @nestjs/swagger（OpenAPI） | 11.4.4 |
+| 数据库 | PostgreSQL | postgres:16-alpine |
+| ORM | Prisma（driver adapter） | 7.8.0 + @prisma/adapter-pg |
+| 缓存 | Redis | redis:7-alpine / ioredis 5.11.1 |
+| 结构化日志 | pino + nestjs-pino | 10.3.1 / 4.6.1 |
+| 配置校验 | zod | 4.4.3 |
+| 单元/集成测试 | Jest + ts-jest | 30.4.2 / 29.4.11 |
+| E2E | Playwright | 1.61.0 |
+| Lint/格式化 | ESLint + typescript-eslint + Prettier | 10.5.0 / 8.61.1 / 3.8.4 |
 
 ## 1. 选型总览
 
@@ -52,6 +74,8 @@
 **后续替换成本**：中。若遇复杂原生 SQL 或性能瓶颈，可在特定模块用 `$queryRaw` fallback，或评估迁移到 Drizzle。
 
 **已知风险**：复杂查询与高级 PostgreSQL 特性需用 raw query；生成产物需加入 `.gitignore`。
+
+> **Phase 1 实施说明（Prisma 7）**：Prisma 7 有重大变更——`datasource.url` 从 schema 移除，连接串改由 `prisma.config.ts` 提供，运行时必须通过 `@prisma/adapter-pg` driver adapter 注入 `PrismaClient`。schema 放在 `packages/database/prisma/`（schema-only 包，负责 generate/migrate），生成产物输出到 `apps/api/src/generated/prisma`（CJS moduleFormat，不入库），由 API 直接消费。Phase 1 仅建立连接机制，不创建任何业务模型。
 
 ## 4. 是否需要 Turborepo
 

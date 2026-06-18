@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Phase 1 最小 CI：
+# - quality：格式 / Lint / 类型检查 / 单元测试 / 构建（无需外部服务）
+# - integration：集成测试（PostgreSQL + Redis service containers）
+# 两个 job 并行执行，均不部署、不发布、不提交、不使用生产密钥。
+jobs:
+  quality:
+    name: Format · Lint · Typecheck · Unit · Build
+    runs-on: ubuntu-latest
+    env:
+      # turbo 的 lint/typecheck/test/build 均声明 dependsOn: ["^build"]，
+      # 会触发 @team-platform/database 的 build（= prisma generate）。
+      # prisma generate 读取 prisma.config.ts 中的 env('DATABASE_URL')，
+      # 需要该变量存在；generate 不连接数据库，占位值即可。
+      # 真实数据库连接在下方 integration job 中提供。
+      DATABASE_URL: postgresql://team_platform:team_platform@localhost:5432/team_platform?schema=public
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    # service containers 在 job 层级定义，端口发布到 runner 宿主，
+    # 步骤内通过 localhost:<port> 访问。
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: team_platform
+          POSTGRES_PASSWORD: team_platform
+          POSTGRES_DB: team_platform
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U team_platform -d team_platform"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://team_platform:team_platform@localhost:5432/team_platform?schema=public
+      TEST_DATABASE_URL: postgresql://team_platform:team_platform@localhost:5432/team_platform_test?schema=public
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # service container 只自动创建 POSTGRES_DB=team_platform；
+      # TEST_DATABASE_URL 指向 team_platform_test，需手动创建。
+      - name: Create test database
+        run: |
+          until docker run --rm --network host -e PGPASSWORD=team_platform postgres:16-alpine \
+              pg_isready -h localhost -p 5432 -U team_platform -d team_platform; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          docker run --rm --network host -e PGPASSWORD=team_platform postgres:16-alpine \
+            psql -h localhost -p 5432 -U team_platform -d team_platform \
+            -c "CREATE DATABASE team_platform_test;"
+
+      # Prisma 7 连接串从 prisma.config.ts 读取，generate 需 DATABASE_URL 存在。
+      - name: Generate Prisma client
+        run: pnpm --filter @team-platform/database db:generate
+
+      - name: Integration tests
+        run: pnpm test:integration
