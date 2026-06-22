@@ -65,3 +65,6 @@ venv/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Playwright MCP 运行时快照
+.playwright-mcp/
