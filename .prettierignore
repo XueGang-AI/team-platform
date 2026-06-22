@@ -7,8 +7,6 @@ out/
 coverage/
 *.tsbuildinfo
 pnpm-lock.yaml
-packages/*/prisma/generated/
-packages/*/src/generated/
 apps/api/src/generated/
 infra/data/
 tests/e2e/test-results/

@@ -16,7 +16,7 @@
 
 ## 2. 当前项目目标
 
-构建团队统一项目治理平台。**当前阶段为 Phase 1（工程骨架与本地开发基础设施），已完成。** 下一阶段为 Phase 1.5（系统级目录架构审计与收敛），由用户明确指令启动，不得自行进入 Phase 2 或后续 Phase。
+构建团队统一项目治理平台。**当前阶段为 Phase 1.5（系统级目录架构审计与收敛），已完成。** 下一阶段为 Phase 2（项目注册与服务目录），由用户明确指令启动，不得自行进入。
 
 ## 3. 当前架构
 
@@ -106,9 +106,25 @@
 - GitHub 写操作必须获得明确授权，默认只读；GitHub MCP 未连接时用本地 Git + SSH；
 - 工具不可用时说明原因，使用可验证的替代方案。
 
-## 13. 阶段纪律
+## 13. 文件放置规则
+
+> 详见 [docs/08-repository-architecture.md](./docs/08-repository-architecture.md)。本节为开发时必须遵守的要点。
+
+- **根配置文件保留原则**：`package.json`/`pnpm-workspace.yaml`/`pnpm-lock.yaml`/`turbo.json`/`tsconfig.base.json`/`eslint.config.mjs`/`.prettierrc`/`.prettierignore`/`.editorconfig`/`.nvmrc`/`.env.example`/`compose.yaml`/`.gitignore`/`README.md`/`CLAUDE.md` 必须留在根目录（工具默认识别路径）。不为视觉整洁移动标准根配置。
+- **新增 app 条件**：满足「`apps/` + `pnpm-workspace.yaml` 声明 + 真实可运行」才创建，不创建空 app。
+- **新增 package 条件**：必须同时满足「至少两个真实消费者 + 职责单一 + 不依赖 apps」才提取为独立 package。单一消费者的代码留在消费方 app 内。
+- **packages 禁止依赖 apps**：`packages/*` 不得 import `apps/*`；`packages/*` 之间禁止横向依赖。
+- **共享包必须有真实消费者**：禁止创建无消费者、无 exports 的空 package 或 schema-only 占位包。
+- **禁止创建空目录和占位 package**：不使用 `.gitkeep` 维持空目录；不为「未来可能需要」提前创建空模块。
+- **Prisma 文件位置**：schema、迁移、`prisma.config.ts` 放 `apps/api/prisma/`（单一消费者，见 [ADR-0004](./docs/adr/0004-database-schema-location.md)）；生成产物 `apps/api/src/generated/`（gitignored）。
+- **测试文件位置**：应用单元测试靠近应用（`apps/api/test/unit`、`apps/web/src/**/*.test.ts`）；API 集成测试 `apps/api/test/integration`；跨应用 E2E 放 `tests/e2e`。
+- **生成物位置和忽略规则**：所有生成产物（Prisma client、`.next`、`dist`、`*.tsbuildinfo`、Playwright 产物）一律 gitignored，不入库。
+- **业务模块**：Phase 2 起按业务域在 `apps/api/src/<domain>/` 新增 NestJS Module，不提前创建空模块目录。
+
+## 14. 阶段纪律
 
 - 每次只执行一个 Phase，不得跨阶段开发；
 - 不得以静态页面、假数据或伪实现冒充完成；
 - 未真实执行验证不得声称通过；
-- 每阶段完成后必须停止并报告，等待下一条明确指令。
+- 每阶段完成后必须停止并报告，等待下一条明确指令；
+- Phase 1.5 已完成，下一阶段为 Phase 2，由用户明确指令启动。

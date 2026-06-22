@@ -7,12 +7,12 @@
 // Prisma 7：datasource.url 已从 schema 移除，连接串通过 prisma.config.ts
 // 提供，运行时通过 @prisma/adapter-pg driver adapter 注入 PrismaClient。
 //
-// 生成产物输出到 apps/api/src/generated/prisma（不入库），由 API 直接消费。
-// 生成 ESM 代码以匹配 Prisma 7 默认 moduleFormat。
+// schema 与生成产物都归属 apps/api（单一消费者，模块化单体）。
+// 生成产物输出到 src/generated/prisma（不入库），由 API 直接消费，CJS moduleFormat。
 
 generator client {
   provider     = "prisma-client"
-  output       = "../../../apps/api/src/generated/prisma"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 

@@ -1,26 +1,12 @@
 /**
  * @team-platform/logger
  *
- * 基于 pino 的结构化日志工厂，统一基础字段与脱敏规则。
- * 被 apps/api（通过 nestjs-pino 接入）使用。
+ * 结构化日志的共享脱敏配置。
+ *
+ * Phase 1.5 收敛：API 通过 nestjs-pino 自建 logger，本包仅提供统一的脱敏路径，
+ * 确保密码、Token、连接串、敏感 Header 不出现在日志中。
+ * 若未来出现第二个需要共享 logger 工厂的服务，再在此恢复 createLogger。
  */
-import pino, { type Logger, type LoggerOptions } from 'pino';
-
-/** 结构化日志基础字段名（为后续 trace_id/span_id/user_id/project_id 预留） */
-export const LOG_FIELDS = {
-  TIMESTAMP: 'time',
-  LEVEL: 'level',
-  MESSAGE: 'msg',
-  SERVICE_NAME: 'service_name',
-  ENVIRONMENT: 'environment',
-  VERSION: 'version',
-  REQUEST_ID: 'request_id',
-  TRACE_ID: 'trace_id',
-  SPAN_ID: 'span_id',
-  USER_ID: 'user_id',
-  PROJECT_ID: 'project_id',
-  ERROR_CODE: 'error_code',
-} as const;
 
 /**
  * 需要脱敏的字段路径。密码、Token、连接串、敏感 Header 一律不出现在日志中。
@@ -41,32 +27,3 @@ export const LOG_REDACTION_PATHS = [
   'req.headers.authorization',
   'req.headers.cookie',
 ];
-
-export interface CreateLoggerOptions {
-  serviceName: string;
-  environment: string;
-  version: string;
-  level?: string;
-  /** 覆盖或追加 pino 选项 */
-  pinoOptions?: Partial<LoggerOptions>;
-}
-
-/**
- * 创建带统一基础字段与脱敏配置的 pino Logger。
- */
-export function createLogger(opts: CreateLoggerOptions): Logger {
-  const base: LoggerOptions = {
-    level: opts.level ?? 'info',
-    base: {
-      [LOG_FIELDS.SERVICE_NAME]: opts.serviceName,
-      [LOG_FIELDS.ENVIRONMENT]: opts.environment,
-      [LOG_FIELDS.VERSION]: opts.version,
-    },
-    redact: {
-      paths: LOG_REDACTION_PATHS,
-      censor: '[REDACTED]',
-    },
-    timestamp: pino.stdTimeFunctions.isoTime,
-  };
-  return pino({ ...base, ...opts.pinoOptions });
-}

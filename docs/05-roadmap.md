@@ -40,11 +40,12 @@ flowchart LR
 - **不做什么**：不实现业务模块、不做登录、不做可观测性组件（Loki/Prometheus/Tempo/Grafana 在 Phase 4）。
 - **主要风险**：依赖版本选择不当 → 已通过官方文档验证锁定；本机已安装的 PG/Redis 占用 5432/6379 → Docker 宿主端口改用 5433/6380 避开冲突。
 
-## Phase 1.5：系统级目录架构审计与收敛（规划中，待启动）
+## Phase 1.5：系统级目录架构审计与收敛（已完成）
 
 - **目标**：审计 Phase 1 产生的目录结构、空包、重复配置、依赖方向，做收敛调整。
 - **前置条件**：Phase 1 完成。
-- **核心交付物**：目录结构收敛方案与实施（由用户单独下发指令启动）。
+- **核心交付物**：删除 `packages/database`（schema 下沉到 `apps/api/prisma`，见 [ADR-0004](./adr/0004-database-schema-location.md)）；`packages/logger` 移除死代码；修复远程 CI integration 失败（移除不必要的建测试库步骤）；新增 [docs/08-repository-architecture.md](./08-repository-architecture.md) 仓库架构文档；CLAUDE.md 增加文件放置规则。
+- **验收标准**：所有运行链路重新验证通过（format/lint/typecheck/unit/integration/build/E2E/API/Web/降级）；远程 CI 通过；文档与真实目录一致。
 - **不做什么**：不进入 Phase 2 业务开发。
 
 ## Phase 2：项目注册与服务目录

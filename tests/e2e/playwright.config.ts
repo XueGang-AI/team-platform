@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  *
  * ───────────────────────────────────────────────────────────────────────────
  * 前置条件（由主 Agent 统一编排，本配置不负责启动基础设施与 API）：
- *   1. docker compose up -d            → PostgreSQL :5432 + Redis :6379
+ *   1. docker compose up -d            → PostgreSQL :5433 + Redis :6380（宿主端口，避开本机冲突）
  *   2. pnpm --filter @team-platform/api start   → API :3001（需 DATABASE_URL / REDIS_URL）
  *   3. pnpm --filter @team-platform/web start   → Web :3000（需先 `pnpm --filter @team-platform/web build`）
  *   4. pnpm --filter @team-platform/e2e exec playwright install chromium

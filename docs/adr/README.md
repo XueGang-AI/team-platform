@@ -22,3 +22,4 @@
 | [0001](./0001-modular-monolith.md) | 采用模块化单体 | accepted |
 | [0002](./0002-control-plane-data-plane.md) | 控制面与数据面分离 | accepted |
 | [0003](./0003-observability-integration.md) | 可观测性集成而非重造 | accepted |
+| [0004](./0004-database-schema-location.md) | Prisma schema 下沉到 apps/api | accepted |

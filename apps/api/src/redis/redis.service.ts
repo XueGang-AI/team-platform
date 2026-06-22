@@ -23,7 +23,6 @@ export class RedisService implements OnModuleDestroy {
     this.client = new Redis(url, {
       connectTimeout: 2000,
       maxRetriesPerRequest: 1,
-      // 不禁用 offlineQueue：readiness 检查可能早于首次连接完成，排队等待比立即失败更合理
       retryStrategy: (times) => (times > 3 ? null : Math.min(times * 100, 1000)),
     });
     this.client.on('error', (err: Error & { code?: string }) => {

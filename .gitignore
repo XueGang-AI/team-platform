@@ -50,8 +50,6 @@ Thumbs.db
 
 # ---------- Prisma ----------
 # 仅忽略生成产物，schema 和迁移必须提交
-packages/*/prisma/generated/
-packages/*/src/generated/
 apps/api/src/generated/
 
 # ---------- Docker ----------

@@ -25,7 +25,7 @@ const config: Config = {
         tsconfig: {
           jsx: 'react-jsx',
           module: 'CommonJS',
-          moduleResolution: 'Node',
+          moduleResolution: 'node16',
           esModuleInterop: true,
           allowSyntheticDefaultImports: true,
           target: 'ES2022',

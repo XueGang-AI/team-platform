@@ -25,23 +25,24 @@ team-platform 是团队内部的统一项目治理平台。在「超级个体」
 
 详细架构图见 [docs/01-architecture.md](./docs/01-architecture.md)。
 
-## 4. 工程结构（Phase 1 真实状态）
+## 4. 工程结构（Phase 1.5 收敛后）
 
 ```
 team-platform/
 ├── apps/
-│   ├── api/            # NestJS 平台 API（健康检查/版本/请求 ID/日志/PG+Redis 连接）
+│   ├── api/            # NestJS 平台 API（含 prisma/ schema 与生成产物归属）
+│   │   ├── prisma/     # Prisma schema 与迁移（Phase 1.5 从 packages/database 下沉）
+│   │   └── src/        # 应用源码（健康检查/版本/请求 ID/日志/PG+Redis 连接）
 │   └── web/            # Next.js 管理后台（首页状态看板）
 ├── packages/
 │   ├── contracts/      # 跨应用共享类型与常量契约
 │   ├── config/         # 运行时环境变量校验（zod）
-│   ├── database/       # Prisma schema 与迁移归属地（schema-only，生成到 apps/api）
-│   └── logger/         # 结构化日志工厂（pino，统一字段与脱敏）
+│   └── logger/         # 结构化日志共享脱敏配置
 ├── infra/
 │   └── README.md       # 本地基础设施说明
 ├── tests/
 │   └── e2e/            # Playwright E2E 测试
-├── docs/               # 架构文档与 ADR
+├── docs/               # 架构文档与 ADR（含 08-repository-architecture）
 ├── .github/workflows/  # GitHub Actions CI
 ├── compose.yaml        # 本地基础设施（仅 PostgreSQL + Redis）
 ├── package.json
@@ -52,6 +53,8 @@ team-platform/
 ├── .env.example
 └── .nvmrc
 ```
+
+> Phase 1.5 收敛要点：删除 `packages/database`（schema 下沉到 `apps/api/prisma`，单一消费者）；`packages/logger` 移除未被消费的 `createLogger` 死代码，仅保留共享脱敏路径。详见 [docs/08-repository-architecture.md](./docs/08-repository-architecture.md) 与 [ADR-0004](./docs/adr/0004-database-schema-location.md)。
 
 ## 5. 技术栈与锁定版本
 
@@ -88,7 +91,7 @@ pnpm stop:infra    # docker compose down（停止，保留数据卷）
 
 ```bash
 pnpm install
-pnpm --filter @team-platform/database db:generate   # 生成 Prisma 客户端到 apps/api/src/generated/prisma
+pnpm --filter @team-platform/api db:generate   # 生成 Prisma 客户端到 apps/api/src/generated/prisma
 ```
 
 ### 6.5 开发模式

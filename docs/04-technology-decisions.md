@@ -75,14 +75,16 @@ Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm re
 
 **已知风险**：复杂查询与高级 PostgreSQL 特性需用 raw query；生成产物需加入 `.gitignore`。
 
-> **Phase 1 实施说明（Prisma 7）**：Prisma 7 有重大变更——`datasource.url` 从 schema 移除，连接串改由 `prisma.config.ts` 提供，运行时必须通过 `@prisma/adapter-pg` driver adapter 注入 `PrismaClient`。schema 放在 `packages/database/prisma/`（schema-only 包，负责 generate/migrate），生成产物输出到 `apps/api/src/generated/prisma`（CJS moduleFormat，不入库），由 API 直接消费。Phase 1 仅建立连接机制，不创建任何业务模型。
+> **Phase 1 实施说明（Prisma 7）**：Prisma 7 有重大变更——`datasource.url` 从 schema 移除，连接串改由 `prisma.config.ts` 提供，运行时必须通过 `@prisma/adapter-pg` driver adapter 注入 `PrismaClient`。
+>
+> **Phase 1.5 位置决策（见 [ADR-0004](./adr/0004-database-schema-location.md)）**：Prisma schema 与 `prisma.config.ts` 下沉到 `apps/api/prisma/`（单一消费者，模块化单体），生成产物输出到 `apps/api/src/generated/prisma`（CJS moduleFormat，不入库），由 API 直接消费。`db:generate`/`db:migrate` 脚本归属 `apps/api`。Phase 1 仅建立连接机制，不创建任何业务模型。
 
 ## 4. 是否需要 Turborepo
 
 ### 最终建议：pnpm workspace + Turborepo（保持轻量配置）
 
 **选择理由**：
-- monorepo 将包含 `apps/`（admin、api、cli）、`packages/`（sdk-ts、shared-types、config）、`infra/`（docker）；
+- monorepo 当前包含 `apps/`（api、web）、`packages/`（contracts、config、logger）、`infra/`、`tests/e2e`（远期随 Phase 推进可能新增 cli、sdk 等，见 [开发路线](./05-roadmap.md)）；
 - Turborepo 提供任务编排、增量构建缓存、依赖图，随 app 增多收益递增。
 
 **替代方案**：纯 pnpm workspace（不引入 Turborepo）。

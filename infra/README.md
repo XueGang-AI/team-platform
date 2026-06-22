@@ -43,22 +43,13 @@ Phase 1 本地基础设施 **只包含** 两个组件：
 
 ```dotenv
 DATABASE_URL=postgresql://team_platform:team_platform@localhost:5433/team_platform?schema=public
-TEST_DATABASE_URL=postgresql://team_platform:team_platform@localhost:5433/team_platform_test?schema=public
 REDIS_URL=redis://localhost:6380
 ```
 
-- `DATABASE_URL`：控制面 PostgreSQL 主库，Prisma（`packages/database`）与 API 运行时使用。
-- `TEST_DATABASE_URL`：集成测试库。注意 `compose.yaml` 中的 `POSTGRES_DB=team_platform` 只会自动创建主库 `team_platform`，`team_platform_test` 需在使用前手动创建（见下文）。
+- `DATABASE_URL`：控制面 PostgreSQL 主库，Prisma（schema 位于 `apps/api/prisma`）与 API 运行时使用。`compose.yaml` 的 `POSTGRES_DB=team_platform` 会自动创建该库。
 - `REDIS_URL`：本地 Redis。
 
-### 创建测试库
-
-本地开发如需 `team_platform_test`，连接到运行中的 PostgreSQL 后执行：
-
-```bash
-docker exec -i team-platform-postgres psql -U team_platform -d team_platform \
-  -c "CREATE DATABASE team_platform_test;"
-```
+> Phase 1 集成测试连接 `DATABASE_URL` 指向的 `team_platform` 主库，不使用独立测试库。Phase 2 引入业务表与迁移后，如需隔离测试数据再增加 `TEST_DATABASE_URL` 与独立测试库。
 
 ## 凭据说明
 
