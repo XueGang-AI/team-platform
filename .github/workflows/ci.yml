@@ -38,6 +38,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 生成 Prisma 客户端：lint/typecheck/test 引用生成的 client 类型，
+      # turbo ^build 只构建 packages 不触发 apps/api 自身的 prisma generate，故显式生成。
+      - name: Generate Prisma client
+        run: pnpm --filter @team-platform/api db:generate
+
       - name: Format check
         run: pnpm format:check
 
@@ -103,8 +108,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # pnpm test:integration 经 turbo 的 dependsOn: ["^build"] 会先构建 apps/api
-      # （含 prisma generate），生成 Prisma 客户端。无需单独建测试库：
-      # 集成测试连接 DATABASE_URL 指向的 team_platform 主库（service container 已自动创建）。
+      # 生成 Prisma 客户端：turbo ^build 只构建 packages 不触发 apps/api 自身的 prisma generate，故显式生成。
+      - name: Generate Prisma client
+        run: pnpm --filter @team-platform/api db:generate
+
+      # 集成测试连接 DATABASE_URL 指向的 team_platform 主库（service container 已自动创建），无需单独建测试库。
       - name: Integration tests
         run: pnpm test:integration
