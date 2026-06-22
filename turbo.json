@@ -1,5 +1,18 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "ENVIRONMENT",
+    "LOG_LEVEL",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "SERVICE_NAME",
+    "API_VERSION",
+    "API_HOST",
+    "API_PORT",
+    "WEB_PORT",
+    "WEB_API_BASE_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

@@ -1,0 +1,287 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e8]:
+        - link "Homepage" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+        - generic [ref=e13]:
+          - navigation "Global" [ref=e16]:
+            - list [ref=e17]:
+              - listitem [ref=e18]:
+                - button "Platform" [ref=e20] [cursor=pointer]:
+                  - text: Platform
+                  - img [ref=e21]
+              - listitem [ref=e23]:
+                - button "Solutions" [ref=e25] [cursor=pointer]:
+                  - text: Solutions
+                  - img [ref=e26]
+              - listitem [ref=e28]:
+                - button "Resources" [ref=e30] [cursor=pointer]:
+                  - text: Resources
+                  - img [ref=e31]
+              - listitem [ref=e33]:
+                - button "Open Source" [ref=e35] [cursor=pointer]:
+                  - text: Open Source
+                  - img [ref=e36]
+              - listitem [ref=e38]:
+                - button "Enterprise" [ref=e40] [cursor=pointer]:
+                  - text: Enterprise
+                  - img [ref=e41]
+              - listitem [ref=e43]:
+                - link "Pricing" [ref=e44] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+                  - generic [ref=e45]: Pricing
+          - generic [ref=e46]:
+            - button "Search or jump to…" [ref=e49] [cursor=pointer]:
+              - img [ref=e51]
+            - link "Sign in" [ref=e54] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FXueGang-AI%2Fteam-platform%2Factions%2Fruns%2F27924682048
+            - link "Sign up" [ref=e55] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Factions%2Fworkflow_runs%2Fshow&source=header-repo&source_repo=XueGang-AI%2Fteam-platform
+            - button "Appearance settings" [ref=e58] [cursor=pointer]:
+              - img
+  - main [ref=e62]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e67]:
+            - img [ref=e68]
+            - link "XueGang-AI" [ref=e71] [cursor=pointer]:
+              - /url: /XueGang-AI
+            - generic [ref=e72]: /
+            - strong [ref=e73]:
+              - link "team-platform" [ref=e74] [cursor=pointer]:
+                - /url: /XueGang-AI/team-platform
+            - generic [ref=e75]: Public
+          - generic [ref=e76]:
+            - list:
+              - listitem [ref=e77]:
+                - link "You must be signed in to change notification settings" [ref=e78] [cursor=pointer]:
+                  - /url: /login?return_to=%2FXueGang-AI%2Fteam-platform
+                  - img [ref=e79]
+                  - text: Notifications
+              - listitem [ref=e81]:
+                - link "Fork 0" [ref=e82] [cursor=pointer]:
+                  - /url: /login?return_to=%2FXueGang-AI%2Fteam-platform
+                  - img [ref=e83]
+                  - text: Fork
+                  - generic "0" [ref=e85]
+              - listitem [ref=e86]:
+                - link "You must be signed in to star a repository" [ref=e88] [cursor=pointer]:
+                  - /url: /login?return_to=%2FXueGang-AI%2Fteam-platform
+                  - img [ref=e89]
+                  - text: Star
+                  - generic "0 users starred this repository" [ref=e91]: "0"
+        - navigation "Repository" [ref=e92]:
+          - list [ref=e93]:
+            - listitem [ref=e94]:
+              - link "Code" [ref=e95] [cursor=pointer]:
+                - /url: /XueGang-AI/team-platform
+                - img [ref=e96]
+                - generic [ref=e98]: Code
+            - listitem [ref=e99]:
+              - link "Issues" [ref=e100] [cursor=pointer]:
+                - /url: /XueGang-AI/team-platform/issues
+                - img [ref=e101]
+                - generic [ref=e104]: Issues
+            - listitem [ref=e105]:
+              - link "Pull requests" [ref=e106] [cursor=pointer]:
+                - /url: /XueGang-AI/team-platform/pulls
+                - img [ref=e107]
+                - generic [ref=e109]: Pull requests
+            - listitem [ref=e110]:
+              - link "Actions" [ref=e111] [cursor=pointer]:
+                - /url: /XueGang-AI/team-platform/actions
+                - img [ref=e112]
+                - generic [ref=e114]: Actions
+            - listitem [ref=e115]:
+              - link "Projects" [ref=e116] [cursor=pointer]:
+                - /url: /XueGang-AI/team-platform/projects
+                - img [ref=e117]
+                - generic [ref=e119]: Projects
+            - listitem [ref=e120]:
+              - link "Security and quality" [ref=e121] [cursor=pointer]:
+                - /url: /XueGang-AI/team-platform/security
+                - img [ref=e122]
+                - generic [ref=e124]: Security and quality
+            - listitem [ref=e125]:
+              - link "Insights" [ref=e126] [cursor=pointer]:
+                - /url: /XueGang-AI/team-platform/pulse
+                - img [ref=e127]
+                - generic [ref=e129]: Insights
+      - generic [ref=e134]:
+        - generic [ref=e137]:
+          - link "CI" [ref=e140] [cursor=pointer]:
+            - /url: /XueGang-AI/team-platform/actions/workflows/ci.yml
+            - img [ref=e141]
+            - generic [ref=e143]: CI
+          - generic [ref=e144]:
+            - generic [ref=e145]:
+              - img "failed:" [ref=e149]
+              - 'heading "fix(ci): generate prisma client before typecheck/test #3" [level=1] [ref=e151]':
+                - generic [ref=e152]: "fix(ci): generate prisma client before typecheck/test #3"
+            - link "Sign in to view logs" [ref=e155] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FXueGang-AI%2Fteam-platform%2Factions%2Fruns%2F27924682048
+        - generic [ref=e156]:
+          - navigation "Workflow run" [ref=e162]:
+            - list [ref=e163]:
+              - listitem [ref=e164]:
+                - link "Summary" [ref=e165] [cursor=pointer]:
+                  - /url: /XueGang-AI/team-platform/actions/runs/27924682048
+                  - generic:
+                    - img
+                  - generic [ref=e167]: Summary
+              - generic [ref=e168]:
+                - heading "All jobs" [level=4] [ref=e169]
+                - button "Filter by job status" [ref=e170] [cursor=pointer]:
+                  - img [ref=e171]
+              - listitem [ref=e173]
+              - listitem [ref=e174]:
+                - list [ref=e175]:
+                  - listitem [ref=e176]:
+                    - generic "Loading" [ref=e177]:
+                      - generic [ref=e181]:
+                        - img [ref=e182]
+                        - generic [ref=e185]: Loading
+              - listitem [ref=e186]
+              - listitem [ref=e187]:
+                - heading "Run details" [level=3] [ref=e189]
+                - list "Run details" [ref=e190]:
+                  - listitem [ref=e191]:
+                    - link "Usage" [ref=e192] [cursor=pointer]:
+                      - /url: /XueGang-AI/team-platform/actions/runs/27924682048/usage
+                      - generic:
+                        - img
+                      - generic [ref=e194]: Usage
+                  - listitem [ref=e195]:
+                    - link "Workflow file" [ref=e196] [cursor=pointer]:
+                      - /url: /XueGang-AI/team-platform/actions/runs/27924682048/workflow
+                      - generic:
+                        - img
+                      - generic [ref=e198]: Workflow file
+          - generic [ref=e200]:
+            - region "Workflow run summary" [ref=e201]:
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - generic [ref=e204]: Triggered via push June 22, 2026 01:506 minutes ago
+                  - generic [ref=e205]:
+                    - link "@XueGang-AI XueGang-AI" [ref=e206] [cursor=pointer]:
+                      - /url: /XueGang-AI
+                      - img "@XueGang-AI" [ref=e207]
+                      - text: XueGang-AI
+                    - generic [ref=e208]:
+                      - generic [ref=e209]: pushed
+                      - link "dd2074f" [ref=e210] [cursor=pointer]:
+                        - /url: /XueGang-AI/team-platform/commit/dd2074f96a485e65275f913dcd970210ca9f8d84
+                        - img [ref=e211]
+                        - text: dd2074f
+                    - link "main" [ref=e213] [cursor=pointer]:
+                      - /url: /XueGang-AI/team-platform/tree/refs/heads/main
+                - generic [ref=e214]:
+                  - generic [ref=e215]: Status
+                  - text: Failure
+                - generic [ref=e216]:
+                  - generic [ref=e217]: Total duration
+                  - link "59s" [ref=e218] [cursor=pointer]:
+                    - /url: /XueGang-AI/team-platform/actions/runs/27924682048/usage
+                - generic [ref=e219]:
+                  - generic [ref=e220]: Artifacts
+                  - text: –
+            - region "Workflow run graph" [ref=e221]:
+              - generic [ref=e223]:
+                - generic [ref=e225]:
+                  - heading "ci.yml" [level=2] [ref=e226]:
+                    - link "ci.yml" [ref=e227] [cursor=pointer]:
+                      - /url: /XueGang-AI/team-platform/actions/runs/27924682048/workflow
+                  - generic [ref=e228]: "on: push"
+                - generic [ref=e230]:
+                  - generic [ref=e231]:
+                    - img
+                    - img
+                    - generic [ref=e233]:
+                      - 'link "completed successfully: Format · Lint · Typecheck · Unit · Build 56s" [ref=e235] [cursor=pointer]':
+                        - /url: /XueGang-AI/team-platform/actions/runs/27924682048/job/82624731861
+                        - generic [ref=e237]:
+                          - img "completed successfully:" [ref=e239]
+                          - generic [ref=e242]: Format · Lint · Typecheck · Unit · Build
+                          - generic [ref=e243]: 56s
+                      - 'link "failed: Integration tests 39s" [ref=e245] [cursor=pointer]':
+                        - /url: /XueGang-AI/team-platform/actions/runs/27924682048/job/82624731871
+                        - generic [ref=e247]:
+                          - img "failed:" [ref=e249]
+                          - generic [ref=e252]: Integration tests
+                          - generic [ref=e253]: 39s
+                  - generic [ref=e254]:
+                    - paragraph [ref=e255]: Oh hello! Nice to see you.
+                    - paragraph [ref=e256]:
+                      - text: Made with ❤️ by
+                      - link [ref=e257] [cursor=pointer]:
+                        - /url: https://actions.github.io/humans.txt
+                        - text: humans.txt
+                - generic [ref=e258]:
+                  - button "Fit to window" [disabled] [ref=e259]:
+                    - img
+                  - generic [ref=e260]:
+                    - button "Zoom out" [disabled] [ref=e262]:
+                      - img
+                    - button "Zoom in" [disabled] [ref=e264]:
+                      - img
+            - region "Annotations" [ref=e265]:
+              - generic [ref=e266]:
+                - generic [ref=e268]:
+                  - heading "Annotations" [level=2] [ref=e269]
+                  - generic [ref=e270]: 2 errors and 2 warnings
+                - table [ref=e271]:
+                  - rowgroup [ref=e272]:
+                    - row "Integration tests Process completed with exit code 1." [ref=e273]:
+                      - cell "Integration tests Process completed with exit code 1." [ref=e274]:
+                        - generic [ref=e275]:
+                          - img [ref=e277]
+                          - generic [ref=e279]:
+                            - link "Integration tests" [ref=e280] [cursor=pointer]:
+                              - /url: /XueGang-AI/team-platform/actions/runs/27924682048/job/82624731871#step:8:90
+                              - strong [ref=e281]: Integration tests
+                            - generic [ref=e284]: Process completed with exit code 1.
+                    - 'row "Integration tests @team-platform/api#test:integration: command (/home/runner/work/team-platform/team-platform/apps/api) /home/runner/setup-pnpm/node_modules/.bin/pnpm run test:integration exited (1) Show more" [ref=e285]':
+                      - 'cell "Integration tests @team-platform/api#test:integration: command (/home/runner/work/team-platform/team-platform/apps/api) /home/runner/setup-pnpm/node_modules/.bin/pnpm run test:integration exited (1) Show more" [ref=e286]':
+                        - generic [ref=e287]:
+                          - img [ref=e289]
+                          - generic [ref=e291]:
+                            - link "Integration tests" [ref=e292] [cursor=pointer]:
+                              - /url: /XueGang-AI/team-platform/actions/runs/27924682048/job/82624731871#step:8:80
+                              - strong [ref=e293]: Integration tests
+                            - generic [ref=e294]:
+                              - generic [ref=e296]: "@team-platform/api#test:integration: command (/home/runner/work/team-platform/team-platform/apps/api) /home/runner/setup-pnpm/node_modules/.bin/pnpm run test:integration exited (1)"
+                              - button "Show more" [ref=e297] [cursor=pointer]
+                    - 'row "Integration tests Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, pnpm/action-setup@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/ Show more" [ref=e298]':
+                      - 'cell "Integration tests Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, pnpm/action-setup@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/ Show more" [ref=e299]':
+                        - generic [ref=e300]:
+                          - img [ref=e302]
+                          - generic [ref=e304]:
+                            - link "Integration tests" [ref=e305] [cursor=pointer]:
+                              - /url: /XueGang-AI/team-platform/actions/runs/27924682048/job/82624731871#step:17:2
+                              - strong [ref=e306]: Integration tests
+                            - generic [ref=e307]:
+                              - generic [ref=e309]:
+                                - text: "Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, pnpm/action-setup@v4. For more information see:"
+                                - link "https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/" [ref=e310] [cursor=pointer]:
+                                  - /url: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+                              - button "Show more" [ref=e311] [cursor=pointer]
+                    - 'row "Format · Lint · Typecheck · Unit · Build Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, pnpm/action-setup@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/ Show more" [ref=e312]':
+                      - 'cell "Format · Lint · Typecheck · Unit · Build Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, pnpm/action-setup@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/ Show more" [ref=e313]':
+                        - generic [ref=e314]:
+                          - img [ref=e316]
+                          - generic [ref=e318]:
+                            - link "Format · Lint · Typecheck · Unit · Build" [ref=e319] [cursor=pointer]:
+                              - /url: /XueGang-AI/team-platform/actions/runs/27924682048/job/82624731861#step:23:2
+                              - strong [ref=e320]: Format · Lint · Typecheck · Unit · Build
+                            - generic [ref=e321]:
+                              - generic [ref=e323]:
+                                - text: "Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, pnpm/action-setup@v4. For more information see:"
+                                - link "https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/" [ref=e324] [cursor=pointer]:
+                                  - /url: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+                              - button "Show more" [ref=e325] [cursor=pointer]
