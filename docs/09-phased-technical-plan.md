@@ -16,17 +16,19 @@ team-platform 最终要做成一个面向团队多项目治理的通用内部平
 
 ## 2. 当前真实状态
 
-截至 2026-06-26，本仓库已具备：
+截至 2026-06-27，本仓库已具备：
 
 - pnpm workspace + Turborepo monorepo；
 - NestJS API，已接入配置校验、结构化日志、请求 ID、异常过滤、Prisma、Redis、健康检查、版本接口；
 - `auth`、`audit`、`project-registry`、`observability`、`governance` 后端模块；
-- Next.js 管理后台，支持登录、项目目录、服务、环境、端点、成员、凭证、可观测性链接、治理中枢总览；
+- Next.js 统一平台入口，支持登录、项目目录、服务、环境、端点、成员、凭证、可观测性链接、治理中枢总览；
+- 管理后台同源 API 代理 `/api/platform/*`，浏览器侧只需要访问一个平台页面；
 - PostgreSQL、Redis、OpenTelemetry Collector、Prometheus、Loki、Tempo、Grafana 本地 Docker Compose；
 - `packages/contracts`、`packages/config`、`packages/logger` 三个共享包；
 - TypeScript SDK、Python SDK、CLI；
 - 单元测试、API 集成测试、Playwright E2E 测试结构；
 - 架构、领域模型、接入协议、路线图、安全原则、风险与 ADR 文档。
+- `pnpm platform:start` / `pnpm platform:stop` 本地总平台启动脚本，默认 Web 入口为 `http://localhost:3004`，API 上游为 `http://localhost:3005`。
 
 当前已经形成最小可用闭环：
 

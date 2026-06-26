@@ -127,6 +127,33 @@ body {
   font-weight: 600;
 }
 
+.platform-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+}
+
+.platform-links a {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.platform-links a:hover {
+  border-color: var(--focus-ring);
+  color: var(--focus-ring);
+}
+
 .panel {
   border: 1px solid var(--border);
   border-radius: var(--radius);

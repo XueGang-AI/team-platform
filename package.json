@@ -11,6 +11,8 @@
     "dev": "turbo run dev",
     "dev:infra": "docker compose up -d",
     "stop:infra": "docker compose down",
+    "platform:start": "bash scripts/start-local-platform.sh",
+    "platform:stop": "bash scripts/stop-local-platform.sh",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

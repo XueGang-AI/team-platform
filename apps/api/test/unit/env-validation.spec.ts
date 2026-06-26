@@ -1,4 +1,4 @@
-import { apiEnvSchema, loadEnv } from '@team-platform/config';
+import { apiEnvSchema, loadEnv, webEnvSchema } from '@team-platform/config';
 
 function validEnv(): Record<string, string> {
   return {
@@ -37,5 +37,30 @@ describe('api env validation', () => {
     expect(() => loadEnv(apiEnvSchema, { ...validEnv(), LOG_LEVEL: 'verbose' })).toThrow(
       /LOG_LEVEL/,
     );
+  });
+});
+
+describe('web env validation', () => {
+  it('accepts same-origin API proxy path', () => {
+    const env = loadEnv(webEnvSchema, {
+      NODE_ENV: 'development',
+      ENVIRONMENT: 'dev',
+      LOG_LEVEL: 'info',
+      WEB_PORT: '3004',
+      WEB_API_BASE_URL: '/api/platform',
+      PLATFORM_API_INTERNAL_URL: 'http://localhost:3005',
+    });
+
+    expect(env.WEB_API_BASE_URL).toBe('/api/platform');
+    expect(env.PLATFORM_API_INTERNAL_URL).toBe('http://localhost:3005');
+  });
+
+  it('rejects invalid browser API base URL', () => {
+    expect(() =>
+      loadEnv(webEnvSchema, {
+        WEB_API_BASE_URL: 'not-a-url',
+        PLATFORM_API_INTERNAL_URL: 'http://localhost:3005',
+      }),
+    ).toThrow(/WEB_API_BASE_URL/);
   });
 });

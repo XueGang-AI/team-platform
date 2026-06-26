@@ -19,19 +19,37 @@ export default function HomePage() {
   return (
     <main id="main" className="page">
       <header className="page-header">
-        <h1>team-platform 管理后台</h1>
+        <h1>团队项目治理平台</h1>
         <div className="meta">
           <span>
             项目名称：<strong>team-platform</strong>
           </span>
           <span>
-            当前阶段：<strong>Phase 6-12 · 治理中枢本地完整闭环</strong>
+            平台入口：<strong>项目目录 · 接入协议 · 权限凭证 · 治理中枢</strong>
+          </span>
+          <span>
+            当前阶段：<strong>Phase 6-12 · 本地完整闭环</strong>
           </span>
           <span>
             环境：<strong>{env.ENVIRONMENT}</strong>
           </span>
         </div>
       </header>
+
+      <nav className="platform-links" aria-label="平台入口">
+        <a href="/api/platform/docs" target="_blank" rel="noreferrer">
+          平台 API 文档
+        </a>
+        <a href="http://localhost:3002" target="_blank" rel="noreferrer">
+          观测看板
+        </a>
+        <a href="http://localhost:9090" target="_blank" rel="noreferrer">
+          指标查询
+        </a>
+        <a href="http://localhost:3100/ready" target="_blank" rel="noreferrer">
+          日志组件
+        </a>
+      </nav>
 
       <ProjectRegistryDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
       <StatusDashboard apiBaseUrl={env.WEB_API_BASE_URL} />

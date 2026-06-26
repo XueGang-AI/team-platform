@@ -5,7 +5,7 @@
 
 ## 1. 架构总览
 
-平台采用**模块化单体（Modular Monolith）**，控制面与数据面分离，优先集成成熟开源组件而非重造基础设施。当前本地成品闭环已经包含管理后台、平台 API、接入协议、SDK/CLI、项目注册、权限、服务凭证、审计、可观测性入口与治理中枢。
+平台采用**模块化单体（Modular Monolith）**，控制面与数据面分离，优先集成成熟开源组件而非重造基础设施。当前本地成品闭环已经包含统一平台入口、平台 API、接入协议、SDK/CLI、项目注册、权限、服务凭证、审计、可观测性入口与治理中枢。
 
 ```mermaid
 flowchart TB
@@ -19,7 +19,8 @@ flowchart TB
 
     subgraph 控制面["平台控制面（自研，模块化单体）"]
         API["平台 API（NestJS）"]
-        ADMIN["管理后台（Next.js）"]
+        ADMIN["统一平台入口（Next.js）"]
+        BFF["同源 API 代理<br/>/api/platform/*"]
         subgraph 核心模块
             REG["项目注册中心"]
             AUTH["身份与权限"]
@@ -36,7 +37,8 @@ flowchart TB
             AUDIT["审计系统"]
         end
         API --- 核心模块
-        ADMIN --- API
+        ADMIN --- BFF
+        BFF --- API
     end
 
     subgraph 数据面["数据面（外部组件，集成）"]
@@ -90,7 +92,7 @@ flowchart TB
 | 可观测性适配层（Observability） | 保存 Loki/Prometheus/Tempo/Grafana 等入口链接；原始数据留在数据面 | 已实现专用模块 |
 | 治理中枢（Governance） | 告警、发布、配置/密钥、任务、功能开关、模型路由、成本、Prompt、评测控制面元数据 | 已实现 `GovernanceRecord` + 专用 API facade |
 | 审计系统（Audit） | 审计事件独立存储、高风险操作记录 | 已实现专用模块 |
-| Web 管理后台 | 项目目录、详情、权限、凭证、可观测性、治理总览 | 已实现 |
+| Web 统一平台入口 | 项目目录、详情、权限、凭证、可观测性、治理总览；通过 `/api/platform/*` 同源代理访问平台 API | 已实现 |
 | CLI / SDK | 登录、manifest、项目查询、治理总览与治理记录创建 | 已实现 TypeScript / Python / CLI |
 | 外部 Secret Store / 通知 / CI/CD Webhook / 对象存储 / 模型 Provider | 生产账号、凭据和真实服务接入 | 保留边界，配置型接入，不在仓库内写真实配置 |
 
@@ -130,6 +132,7 @@ flowchart TB
 
 ### 4.4 查询与权限隔离
 
+- 浏览器只需要访问统一平台入口；页面侧 API 请求走 Next.js `/api/platform/*` 同源代理，再转发到平台 API；
 - 控制面查询走平台 API，受项目级 RBAC 控制；
 - 数据面查询通过平台生成的「带权限上下文的跳转链接」或代理请求，确保用户只能看到有权限项目的可观测性数据；
 - 平台不替代 Grafana 的可视化能力，而是提供带项目上下文的跳转与嵌入。

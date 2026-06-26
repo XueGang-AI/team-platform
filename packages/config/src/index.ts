@@ -13,6 +13,29 @@ export const baseEnvSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 });
 
+const httpUrlSchema = z
+  .string()
+  .url()
+  .refine((value) => {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  }, '必须是 http(s) URL');
+
+const browserApiBaseUrlSchema = z
+  .string()
+  .min(1)
+  .refine((value) => {
+    if (value.startsWith('/')) {
+      return true;
+    }
+    try {
+      const url = new URL(value);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }, '必须是同源路径或 http(s) URL');
+
 /** API 专属环境变量 */
 export const apiEnvSchema = baseEnvSchema.extend({
   SERVICE_NAME: z.string().min(1).default('team-platform-api'),
@@ -40,7 +63,8 @@ export const apiEnvSchema = baseEnvSchema.extend({
 /** Web（管理后台）专属环境变量 */
 export const webEnvSchema = baseEnvSchema.extend({
   WEB_PORT: z.coerce.number().int().positive().default(3000),
-  WEB_API_BASE_URL: z.string().url().default('http://localhost:3001'),
+  WEB_API_BASE_URL: browserApiBaseUrlSchema.default('/api/platform'),
+  PLATFORM_API_INTERNAL_URL: httpUrlSchema.default('http://localhost:3001'),
 });
 
 export type BaseEnv = z.infer<typeof baseEnvSchema>;
