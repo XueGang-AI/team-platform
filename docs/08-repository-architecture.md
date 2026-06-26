@@ -27,6 +27,7 @@ team-platform/
 │   │   ├── jest.integration.config.ts
 │   │   ├── tsconfig.json
 │   │   └── package.json
+│   ├── cli/                    # team-platform CLI
 │   └── web/                    # 管理后台（Next.js）
 │       ├── src/
 │       │   ├── app/            # App Router 页面
@@ -37,16 +38,21 @@ team-platform/
 │       ├── tsconfig.json
 │       └── package.json
 ├── packages/
-│   ├── contracts/              # 跨应用共享类型与常量契约（API + Web 消费）
+│   ├── contracts/              # 跨应用共享类型与常量契约
 │   ├── config/                 # 运行时环境变量校验（zod，API + Web 消费）
-│   └── logger/                 # 结构化日志共享脱敏配置（API 消费）
+│   ├── logger/                 # 结构化日志共享脱敏配置（API 消费）
+│   ├── sdk-python/             # Python SDK
+│   └── sdk-ts/                 # TypeScript SDK
+├── examples/
+│   └── project-manifests/      # project.yaml 接入示例
 ├── infra/
-│   └── README.md               # 本地基础设施说明（编排在根 compose.yaml）
+│   ├── README.md               # 本地基础设施说明（编排在根 compose.yaml）
+│   └── observability/          # OTel/Prometheus/Loki/Tempo/Grafana 配置
 ├── tests/
 │   └── e2e/                    # 跨应用 Playwright E2E 测试
 ├── docs/                       # 架构文档与 ADR
 ├── .github/workflows/          # GitHub Actions CI
-├── compose.yaml                # 本地基础设施（仅 PostgreSQL + Redis）
+├── compose.yaml                # 本地基础设施（PostgreSQL + Redis + 可观测性组件）
 ├── package.json                # 根 manifest 与 workspace 脚本
 ├── pnpm-workspace.yaml
 ├── pnpm-lock.yaml
@@ -68,10 +74,14 @@ team-platform/
 |------|------|---------|
 | `apps/api` | 平台 API 应用，含其专属的 Prisma schema、迁移、生成产物、测试 | 不放 Web 代码；不放跨应用共享的纯类型（放 contracts） |
 | `apps/web` | 管理后台应用 | 不直连 PostgreSQL/Redis；不放 Node 专用代码；不放服务端密钥 |
-| `packages/contracts` | API 与 Web 双端真实共享的类型与常量契约 | 不含运行时框架依赖；不含业务实现；不含仅某一端用的内部类型 |
+| `apps/cli` | 平台 CLI | 不放平台服务端实现；不绕过 SDK/API 直接连库 |
+| `packages/contracts` | API、Web、CLI、SDK 共享的类型与常量契约 | 不含运行时框架依赖；不含业务实现；不含仅某一端用的内部类型 |
 | `packages/config` | API 与 Web 双端真实共享的环境变量校验 schema 与 loader | 不把 Node 专用能力打包进 Web 客户端 |
 | `packages/logger` | 共享的日志脱敏配置 | 不绑定 NestJS；不含未被消费的工厂代码 |
-| `infra/` | 本地基础设施说明（编排在根 compose.yaml） | 不为无配置的组件创建空子目录 |
+| `packages/sdk-ts` | TypeScript SDK | 不承担业务逻辑；只封装平台协议 |
+| `packages/sdk-python` | Python SDK | 不承担业务逻辑；优先保持低依赖 |
+| `examples/` | 接入 manifest 示例 | 不放真实密钥、生产内网地址或业务数据 |
+| `infra/` | 本地基础设施说明与可观测性组件配置 | 不放真实生产凭据 |
 | `tests/e2e/` | 跨应用 E2E 测试 | 不放应用内单元/集成测试 |
 | `docs/` | 架构文档与 ADR | 不放代码 |
 | `.github/workflows/` | CI workflow | 不放部署/发布脚本 |
@@ -103,13 +113,18 @@ apps/api ──→ packages/contracts
         ├──→ packages/config
         └──→ packages/logger
 
+apps/cli ──→ packages/sdk-ts
+        └──→ packages/contracts
+
+packages/sdk-ts ──→ packages/contracts
+
 packages/* 不得依赖 apps/*
-packages 之间无横向依赖
+除 sdk-ts 依赖 contracts 外，packages 之间不做横向依赖
 ```
 
 规则：
 - `packages/*` 禁止 import `apps/*`（无反向依赖）。
-- `packages/*` 之间禁止横向 import（无循环）。
+- `packages/*` 之间默认禁止横向 import；当前仅允许 `sdk-ts -> contracts`。
 - `contracts` 不依赖任何框架。
 - `config` 仅依赖 `zod`。
 - `logger` 不绑定 NestJS。
@@ -166,8 +181,8 @@ CI 与本地运行相同测试入口。E2E 不在 CI 中运行（需真实浏览
 
 - 本地编排在根 `compose.yaml`（Docker Compose 默认入口）。
 - 说明文档在 `infra/README.md`。
-- Phase 1 仅 PostgreSQL + Redis；可观测性组件（Loki/Prometheus/Tempo/Grafana 等）在 Phase 4 引入。
-- 端口：本地宿主 5433(PG)/6380(Redis) 避开本机冲突；CI service container 用默认 5432/6379。
+- 当前本地组件：PostgreSQL、Redis、OpenTelemetry Collector、Prometheus、Loki、Tempo、Grafana。
+- 端口：本地宿主 5433(PG)/6380(Redis)/3002(Grafana)/9090(Prometheus)/3100(Loki)/3200(Tempo)/4317-4318(OTel) 避开常见冲突；CI service container 用默认 5432/6379。
 - 不为无额外配置的组件创建 `infra/postgres/`、`infra/redis/` 空目录。
 
 ## 11. 相关文档

@@ -1,0 +1,8 @@
+[project]
+name = "team-platform-sdk"
+version = "0.1.0"
+description = "Minimal Python SDK for team-platform project onboarding"
+requires-python = ">=3.10"
+
+[tool.team-platform]
+package = "team_platform_sdk"

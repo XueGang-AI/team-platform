@@ -1,0 +1,22 @@
+{
+  "name": "@team-platform/cli",
+  "version": "1.0.0",
+  "private": true,
+  "description": "team-platform CLI",
+  "bin": {
+    "team-platform": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@team-platform/contracts": "workspace:*",
+    "@team-platform/sdk-ts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
+}

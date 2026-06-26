@@ -11,7 +11,11 @@
     "API_HOST",
     "API_PORT",
     "WEB_PORT",
-    "WEB_API_BASE_URL"
+    "WEB_API_BASE_URL",
+    "HEALTH_CHECK_ALLOWED_HOSTS",
+    "HEALTH_CHECK_TIMEOUT_MS",
+    "HEALTH_CHECK_MAX_CONCURRENCY",
+    "AUTH_TOKEN_SECRET"
   ],
   "tasks": {
     "build": {

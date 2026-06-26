@@ -1,0 +1,47 @@
+# team-platform 项目自身的 Manifest 示例
+# 不包含任何密钥、Token、密码或生产地址。
+apiVersion: team-platform.io/v1alpha1
+kind: Project
+
+metadata:
+  slug: team-platform
+  name: 团队统一项目治理平台
+  description: 面向团队多项目统一治理的内部开发者平台
+  labels:
+    category: platform
+
+spec:
+  type: INTERNAL_TOOL
+
+  owner:
+    name: XueGang-AI
+    email: example@example.com
+
+  repository:
+    url: git@github.com:XueGang-AI/team-platform.git
+
+  services:
+    - slug: web
+      name: 管理后台
+      type: WEB
+    - slug: api
+      name: 平台 API
+      type: API
+
+  environments:
+    - slug: development
+      name: 开发环境
+
+  endpoints:
+    - service: web
+      environment: development
+      baseUrl: http://localhost:3000
+      healthCheck:
+        enabled: false
+
+    - service: api
+      environment: development
+      baseUrl: http://localhost:3001
+      healthCheck:
+        enabled: true
+        path: /health/ready

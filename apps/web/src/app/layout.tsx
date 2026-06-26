@@ -5,7 +5,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'team-platform · 管理后台',
   description:
-    'team-platform 团队统一项目治理平台管理后台。当前为 Phase 1 工程骨架与本地基础设施阶段。',
+    'team-platform 团队统一项目治理平台管理后台，覆盖项目目录、平台 API、接入协议与治理中枢。',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -1,11 +1,11 @@
 # 04 - 技术选型
 
 > 本文记录平台关键技术选型的最终建议、理由、替代方案与已知风险。
-> Phase 1 已通过 npm registry 与 Context7 验证并锁定精确版本（见 CLAUDE.md 技术栈表）。
+> 当前工程已锁定关键依赖版本（见 `package.json`、各 workspace package 与 lockfile）。
 
-## 0. Phase 1 已落地版本
+## 0. 当前落地版本
 
-Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm registry `npm view` + Context7 官方文档）：
+当前本地成品闭环已完成，关键依赖锁定版本如下：
 
 | 维度 | 选型 | 锁定版本 |
 |------|------|---------|
@@ -30,14 +30,15 @@ Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm re
 | 维度 | 选型 | 阶段 |
 |------|------|------|
 | Monorepo | pnpm workspace + Turborepo | Phase 1 |
-| 管理后台 | Next.js + TypeScript | Phase 2 |
-| 平台 API | NestJS（可切 Fastify adapter） | Phase 2 |
+| 管理后台 | Next.js + TypeScript | 已实现 |
+| 平台 API | NestJS（可切 Fastify adapter） | 已实现 |
 | 数据库 | PostgreSQL | Phase 1 |
 | ORM | Prisma | Phase 1 |
 | 缓存/队列 | Redis | Phase 1 |
-| 可观测性 | OpenTelemetry + Prometheus + Grafana + Loki + Tempo | Phase 4 |
-| 本地基础设施 | Docker Compose | Phase 1 |
-| API 描述 | OpenAPI | Phase 2 |
+| 可观测性 | OpenTelemetry Collector + Prometheus + Grafana + Loki + Tempo | 已实现本地骨架 |
+| 本地基础设施 | Docker Compose | 已实现 |
+| API 描述 | OpenAPI | 已实现 |
+| CLI / SDK | TypeScript SDK + Python SDK + CLI | 已实现 |
 | 测试 | 单元 + 集成 + Playwright E2E | 各阶段 |
 
 ## 2. NestJS vs Fastify
@@ -56,7 +57,7 @@ Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm re
 
 **后续替换成本**：低。NestJS 支持切换底层 HTTP adapter 为 Fastify，若遇性能瓶颈可平滑切换，业务代码不变。
 
-**已知风险**：NestJS 生态更新依赖其主版本周期；需在 Phase 1 锁定稳定主版本。
+**已知风险**：NestJS 生态更新依赖其主版本周期；依赖升级需走独立验证，不混入业务提交。
 
 ## 3. Prisma 是否适合
 
@@ -75,16 +76,16 @@ Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm re
 
 **已知风险**：复杂查询与高级 PostgreSQL 特性需用 raw query；生成产物需加入 `.gitignore`。
 
-> **Phase 1 实施说明（Prisma 7）**：Prisma 7 有重大变更——`datasource.url` 从 schema 移除，连接串改由 `prisma.config.ts` 提供，运行时必须通过 `@prisma/adapter-pg` driver adapter 注入 `PrismaClient`。
+> **Prisma 7 实施说明**：Prisma 7 有重大变更——`datasource.url` 从 schema 移除，连接串改由 `prisma.config.ts` 提供，运行时必须通过 `@prisma/adapter-pg` driver adapter 注入 `PrismaClient`。
 >
-> **Phase 1.5 位置决策（见 [ADR-0004](./adr/0004-database-schema-location.md)）**：Prisma schema 与 `prisma.config.ts` 下沉到 `apps/api/prisma/`（单一消费者，模块化单体），生成产物输出到 `apps/api/src/generated/prisma`（CJS moduleFormat，不入库），由 API 直接消费。`db:generate`/`db:migrate` 脚本归属 `apps/api`。Phase 1 仅建立连接机制，不创建任何业务模型。
+> **位置决策（见 [ADR-0004](./adr/0004-database-schema-location.md)）**：Prisma schema 与 `prisma.config.ts` 下沉到 `apps/api/prisma/`（单一消费者，模块化单体），生成产物输出到 `apps/api/src/generated/prisma`（CJS moduleFormat，不入库），由 API 直接消费。`db:generate`/`db:migrate` 脚本归属 `apps/api`。
 
 ## 4. 是否需要 Turborepo
 
 ### 最终建议：pnpm workspace + Turborepo（保持轻量配置）
 
 **选择理由**：
-- monorepo 当前包含 `apps/`（api、web）、`packages/`（contracts、config、logger）、`infra/`、`tests/e2e`（远期随 Phase 推进可能新增 cli、sdk 等，见 [开发路线](./05-roadmap.md)）；
+- monorepo 当前包含 `apps/`（api、web、cli）、`packages/`（contracts、config、logger、sdk-ts、sdk-python）、`infra/`、`examples/`、`tests/e2e`；
 - Turborepo 提供任务编排、增量构建缓存、依赖图，随 app 增多收益递增。
 
 **替代方案**：纯 pnpm workspace（不引入 Turborepo）。
@@ -105,7 +106,7 @@ Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm re
 - **采集**：接入方通过 OpenTelemetry SDK 采集日志/指标/trace，注入统一维度标签；
 - **存储**：Loki（日志）、Prometheus（指标）、Tempo（trace），均为成熟开源组件；
 - **可视化**：Grafana 统一 Dashboard，平台提供带项目上下文的跳转与嵌入；
-- **平台职责**：接收采集数据并关联 `project_id` 等维度，存索引与跳转链接到 PostgreSQL，**不复制全量数据**。
+- **平台职责**：保存项目/服务/环境维度、外部入口链接与治理元数据，**不复制全量数据**。
 
 详见 [ADR-0003](./adr/0003-observability-integration.md)。
 
@@ -123,7 +124,7 @@ Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm re
 
 **后续替换成本**：低。`external_ref` 抽象屏蔽了具体 Store 实现，可切换 provider。
 
-## 8. 第一阶段是否需要 Kubernetes
+## 8. 当前是否需要 Kubernetes
 
 ### 最终建议：不需要，使用 Docker Compose
 
@@ -136,9 +137,9 @@ Phase 1 工程骨架已完成，关键依赖锁定版本如下（来源：npm re
 
 ## 9. 版本锁定策略
 
-- Phase 0 不锁定精确版本；
-- Phase 1 工程骨架落地时，通过官方文档（优先 Context7）验证当前稳定主版本后锁定；
-- 依赖升级走独立变更与 ADR，不混入业务提交。
+- 当前版本由 `pnpm-lock.yaml` 锁定；
+- 依赖升级走独立变更，至少执行 format/lint/typecheck/test/build；
+- 涉及架构形态、数据库、数据面组件替换时补充 ADR。
 
 ## 10. 相关文档
 

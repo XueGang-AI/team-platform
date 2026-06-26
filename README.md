@@ -8,12 +8,17 @@ team-platform 是团队内部的统一项目治理平台。在「超级个体」
 
 ## 2. 当前状态
 
-**当前阶段：Phase 1（工程骨架与本地开发基础设施），已完成。** 本仓库从 GitHub 恢复后重建。
+**当前阶段：管理后台、平台 API、接入协议、治理中枢已形成本地完整成品闭环。** 本仓库从 GitHub 恢复后重建，并按阶段推进到可接入真实项目的通用治理平台。
 
 - ✅ Phase 0：架构文档、领域模型、接入协议、技术选型、开发路线、安全原则、风险分析、ADR。
 - ✅ Phase 1：pnpm workspace + Turborepo monorepo、NestJS API、Next.js 管理后台、PostgreSQL + Redis 本地基础设施、Prisma 7 driver adapter、单元 + 集成 + Playwright E2E 测试、GitHub Actions CI。
-- ❌ Phase 2 及之后：项目注册、鉴权、可观测性接入、SDK/CLI、告警、配置/密钥中心、发布管理、任务中心、文件/通知/功能开关、模型网关与成本治理等全部业务能力均未实现。
-- ⏭ 下一步：Phase 1.5（系统级目录架构审计与收敛），由单独指令启动，不直接进入 Phase 2。
+- ✅ Phase 2：项目注册、服务目录、环境、端点、manifest validate/apply、手动健康检查。
+- ✅ Phase 3：本地邮箱登录、Bearer token、项目成员 RBAC、服务凭证、审计事件。
+- ✅ Phase 4：可观测性入口控制面、OTel/Prometheus/Loki/Tempo/Grafana 本地编排骨架。
+- ✅ Phase 5：TypeScript SDK、Python SDK、CLI。
+- ✅ Phase 6-12：告警、配置/密钥、发布、任务、文件/通知/功能开关、模型网关/成本、Prompt/评测以 `GovernanceRecord` 统一控制面承载，并提供专用治理 API、CLI/SDK 调用和管理后台治理总览。
+- ✅ 本地 Docker 已验证启动 PostgreSQL、Redis、OTel Collector、Prometheus、Loki、Tempo、Grafana；`manjv-studio` 已通过 `project.yaml` 接入测试。
+- ⚠️ SSO、外部 Secret Store、真实通知渠道、CI/CD Webhook、对象存储和模型 Provider 属于外部配置/账号型集成，当前保留适配边界，不在仓库内写入真实配置。
 
 ## 3. 总体架构概览
 
@@ -25,26 +30,31 @@ team-platform 是团队内部的统一项目治理平台。在「超级个体」
 
 详细架构图见 [docs/01-architecture.md](./docs/01-architecture.md)。
 
-## 4. 工程结构（Phase 1.5 收敛后）
+## 4. 工程结构（当前）
 
 ```
 team-platform/
 ├── apps/
-│   ├── api/            # NestJS 平台 API（含 prisma/ schema 与生成产物归属）
-│   │   ├── prisma/     # Prisma schema 与迁移（Phase 1.5 从 packages/database 下沉）
-│   │   └── src/        # 应用源码（健康检查/版本/请求 ID/日志/PG+Redis 连接）
-│   └── web/            # Next.js 管理后台（首页状态看板）
+│   ├── api/            # NestJS 平台 API（auth/audit/projects/observability/governance）
+│   │   ├── prisma/     # Prisma schema 与迁移
+│   │   └── src/        # API 模块源码
+│   ├── cli/            # 平台 CLI
+│   └── web/            # Next.js 管理后台
 ├── packages/
 │   ├── contracts/      # 跨应用共享类型与常量契约
 │   ├── config/         # 运行时环境变量校验（zod）
-│   └── logger/         # 结构化日志共享脱敏配置
+│   ├── logger/         # 结构化日志共享脱敏配置
+│   ├── sdk-python/     # Python SDK
+│   └── sdk-ts/         # TypeScript SDK
 ├── infra/
-│   └── README.md       # 本地基础设施说明
+│   ├── README.md       # 本地基础设施说明
+│   └── observability/  # OTel/Prometheus/Loki/Tempo/Grafana 配置
+├── examples/           # manifest 示例
 ├── tests/
 │   └── e2e/            # Playwright E2E 测试
 ├── docs/               # 架构文档与 ADR（含 08-repository-architecture）
 ├── .github/workflows/  # GitHub Actions CI
-├── compose.yaml        # 本地基础设施（仅 PostgreSQL + Redis）
+├── compose.yaml        # 本地基础设施（PostgreSQL + Redis + 可观测性组件）
 ├── package.json
 ├── pnpm-workspace.yaml
 ├── turbo.json
@@ -66,7 +76,7 @@ team-platform/
 
 - Node.js 24（见 `.nvmrc`）
 - pnpm 11.7.0（`corepack enable`）
-- Docker（用于本地 PostgreSQL + Redis）
+- Docker（用于本地 PostgreSQL + Redis + 可观测性组件）
 
 ### 6.2 环境变量准备
 
@@ -100,13 +110,23 @@ pnpm --filter @team-platform/api db:generate   # 生成 Prisma 客户端到 apps
 pnpm dev   # 同时启动 API(:3001) 与 Web(:3000)
 ```
 
+### 6.6 接入真实项目示例
+
+仓库内提供 `examples/project-manifests/manjv-studio.yaml`，并已同步写入 `/Users/xuegang/Desktop/My Project/manjv-studio/project.yaml`。本地 API 启动后可用 CLI 校验并应用：
+
+```bash
+TOKEN=$(node apps/cli/dist/index.js login --email admin@example.com --name Admin --api http://localhost:3001 | node -e 'let s="";process.stdin.on("data",d=>s+=d);process.stdin.on("end",()=>console.log(JSON.parse(s).token))')
+node apps/cli/dist/index.js validate examples/project-manifests/manjv-studio.yaml --api http://localhost:3001
+node apps/cli/dist/index.js apply examples/project-manifests/manjv-studio.yaml --api http://localhost:3001 --token "$TOKEN"
+```
+
 ## 7. 常用命令
 
 | 命令 | 说明 |
 |------|------|
 | `pnpm install` | 安装依赖 |
 | `pnpm dev` | 启动 API + Web 开发模式 |
-| `pnpm dev:infra` / `pnpm stop:infra` | 启停本地 PostgreSQL + Redis |
+| `pnpm dev:infra` / `pnpm stop:infra` | 启停本地 PostgreSQL + Redis + 可观测性组件 |
 | `pnpm build` | 构建全部包（turbo） |
 | `pnpm lint` | ESLint 检查 |
 | `pnpm typecheck` | TypeScript 类型检查 |
@@ -115,13 +135,20 @@ pnpm dev   # 同时启动 API(:3001) 与 Web(:3000)
 | `pnpm test:e2e` | Playwright E2E（需先启动 infra + API + Web） |
 | `pnpm format` / `pnpm format:check` | Prettier 格式化 / 检查 |
 
-## 8. API 端点（Phase 1）
+## 8. 核心 API 端点
 
 | 端点 | 语义 |
 |------|------|
 | `GET /health/live` | 进程存活检查（不检查依赖，始终 200） |
 | `GET /health/ready` | 就绪检查：真实检查 PostgreSQL + Redis，未就绪返回 503 |
 | `GET /version` | 服务名/版本/环境/Node 版本 |
+| `POST /auth/login` / `GET /auth/me` | 本地邮箱登录与当前用户 |
+| `/projects` | 项目注册、服务、环境、端点、成员、凭证 |
+| `/project-manifests/validate` / `/project-manifests/apply` | manifest 校验与应用 |
+| `/projects/:slug/observability-links` | 可观测性入口 |
+| `/projects/:slug/governance-records` | 通用治理记录 |
+| `/projects/:slug/governance-dashboard` | 治理中枢聚合总览 |
+| `/projects/:slug/alerts/*`、`/deployments`、`/configurations`、`/secret-references`、`/cost-records`、`/model-routes`、`/prompt-versions`、`/evaluation-runs` | 告警、发布、配置/密钥、成本、模型、Prompt/评测专用治理入口 |
 | `GET /docs` | OpenAPI（Swagger）文档 |
 
 - 每个请求接收或生成 `x-request-id` 并写回响应头、写入结构化日志。
@@ -143,18 +170,19 @@ GitHub Actions workflow（`.github/workflows/ci.yml`）：固定 Node 24 + pnpm 
 | [开发路线](./docs/05-roadmap.md) | 12 个阶段的依赖与交付 |
 | [安全原则](./docs/06-security-principles.md) | 权限、隔离、密钥、审计、故障隔离 |
 | [风险分析](./docs/07-risks.md) | 主要风险与控制策略 |
+| [分阶段技术方案](./docs/09-phased-technical-plan.md) | 从最小 MVP 到最终形态的阶段技术落地方案 |
 | [ADR 索引](./docs/adr/README.md) | 架构决策记录 |
 
 ## 11. 贡献和开发约束
 
 - 详见 [CLAUDE.md](./CLAUDE.md)；
-- 每次只执行一个 Phase，不得跨阶段开发；
+- 默认按阶段交付和验收；连续推进时也要保留阶段边界、验证记录和真实状态文档；
 - 不得以静态页面、假数据或伪实现冒充完成；
 - 未真实执行验证不得声称通过；
 - 文档只能描述当前真实状态，规划须明确标注；
 - 不提交密钥、Token、密码和真实生产地址；
 - 禁止 force push、`reset --hard`、改写历史等破坏性操作；
-- 每阶段独立提交，完成后停止并报告。
+- 每阶段建议独立提交；完成后报告实际通过与受环境阻塞的验收项。
 
 ## 12. 安全说明
 

@@ -2,7 +2,7 @@
   "name": "team-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "团队统一项目治理平台 - Phase 1 工程骨架",
+  "description": "团队统一项目治理平台 - 管理后台、平台 API、接入协议与治理中枢",
   "packageManager": "pnpm@11.7.0",
   "engines": {
     "node": ">=24"

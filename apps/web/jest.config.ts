@@ -29,7 +29,7 @@ const config: Config = {
           esModuleInterop: true,
           allowSyntheticDefaultImports: true,
           target: 'ES2022',
-          lib: ['ES2022'],
+          lib: ['dom', 'dom.iterable', 'ES2022'],
           types: ['node', 'jest'],
           skipLibCheck: true,
           isolatedModules: false,

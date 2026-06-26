@@ -141,7 +141,7 @@ export function StatusDashboard({ apiBaseUrl }: StatusDashboardProps) {
       </ul>
 
       <p className="phase-note">
-        项目治理业务将在 Phase 2 开始实现。当前仅展示真实系统状态，无业务数据。
+        当前系统状态来自真实 API 健康检查；项目治理控制面由平台 API 提供。
       </p>
     </section>
   );

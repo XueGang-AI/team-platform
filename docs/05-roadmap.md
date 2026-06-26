@@ -1,7 +1,7 @@
 # 05 - 开发路线
 
 > 本文给出平台分阶段建设的可执行路线，每个阶段写明目标、前置条件、交付物、验收标准、不做什么与主要风险。
-> **每次只执行一个 Phase，不得跨阶段开发。**
+> 默认每次只执行一个 Phase；连续推进时也必须保留阶段边界、验收记录和真实状态文档。
 
 ## 阶段依赖总览
 
@@ -21,6 +21,16 @@ flowchart LR
     P5 --> P11[Phase 11 模型网关与成本配额]
     P11 --> P12[Phase 12 Prompt 版本与模型评测]
 ```
+
+## 当前实现状态
+
+截至 2026-06-26：
+
+- Phase 0、Phase 1、Phase 1.5 已完成；
+- Phase 2-5 已通过专用模块形成最小闭环；
+- Phase 6-12 已通过 `GovernanceRecord` 通用控制面、专用治理 API facade、CLI/SDK 与管理后台治理总览形成本地完整闭环；
+- `manjv-studio` 已通过 `project.yaml` 作为真实 TypeScript / Next.js 项目接入样例；
+- 生产化阶段还需要按团队真实使用频率拆分高频治理域，并接入 SSO、外部 Secret Store、通知渠道、CI/CD Webhook、对象存储与模型 Provider 的真实配置。
 
 ## Phase 0：架构与仓库初始化（已完成）
 
@@ -48,7 +58,7 @@ flowchart LR
 - **验收标准**：所有运行链路重新验证通过（format/lint/typecheck/unit/integration/build/E2E/API/Web/降级）；远程 CI 通过；文档与真实目录一致。
 - **不做什么**：不进入 Phase 2 业务开发。
 
-## Phase 2：项目注册与服务目录
+## Phase 2：项目注册与服务目录（已完成）
 
 - **目标**：实现项目、服务、环境、成员的注册与查询，管理后台可见服务目录。
 - **前置条件**：Phase 1。
@@ -57,7 +67,7 @@ flowchart LR
 - **不做什么**：不做鉴权（先用最简保护）、不做可观测性数据接入。
 - **主要风险**：模型设计过度 → 只实现核心字段。
 
-## Phase 3：身份、权限与服务凭证
+## Phase 3：身份、权限与服务凭证（已完成）
 
 - **目标**：统一用户认证、项目级 RBAC、服务身份凭证签发/轮换/吊销、审计事件。
 - **前置条件**：Phase 2。
@@ -66,7 +76,7 @@ flowchart LR
 - **不做什么**：不做复杂 ABAC、不做 SSO 全量集成（先留接口）。
 - **主要风险**：权限模型过度复杂 → 先 RBAC，按需扩展。
 
-## Phase 4：可观测性接入
+## Phase 4：可观测性接入（已完成）
 
 - **目标**：通过 OpenTelemetry 接收日志/指标/trace，关联项目维度，提供跳转。
 - **前置条件**：Phase 3（凭证）、Phase 1（可观测性组件）。
@@ -75,74 +85,74 @@ flowchart LR
 - **不做什么**：不自建存储、不复制全量数据。
 - **主要风险**：指标维度爆炸 → 约束 label 基数。
 
-## Phase 5：TypeScript/Python SDK 与 CLI
+## Phase 5：TypeScript/Python SDK 与 CLI（已完成）
 
-- **目标**：标准化接入，SDK 封装运行时能力，CLI 提供管理操作。
+- **目标**：标准化接入，SDK 封装平台 API 协议，CLI 提供管理操作。
 - **前置条件**：Phase 4、Phase 3。
-- **核心交付物**：sdk-ts、sdk-python、CLI（注册/校验/查询/轮换）。
-- **验收标准**：SDK 可上报可观测性数据并具备故障隔离；CLI 可完成核心管理操作。
+- **核心交付物**：sdk-ts、sdk-python、CLI（登录、manifest 校验/apply、项目查询、治理总览与治理记录创建）。
+- **验收标准**：SDK/CLI 可通过平台 API 完成项目接入与治理控制面操作；CLI 可在 CI 中使用并返回明确退出码。
 - **不做什么**：不实现所有模块能力，只覆盖已上线模块。
 - **主要风险**：SDK 强侵入 → 提供降级开关与渐进接入。
 
-## Phase 6：告警中心
+## Phase 6：告警中心（由 GovernanceRecord 支撑最小闭环）
 
 - **目标**：告警规则、告警事件、通知分发。
 - **前置条件**：Phase 4。
-- **核心交付物**：AlertRule/AlertEvent 模块、基于 Prometheus 的评估、通知分发。
+- **核心交付物**：当前以 `GovernanceRecord` 的 `ALERT_RULE` / `ALERT_EVENT` 记录规则与事件；后续按真实需求拆分 AlertRule/AlertEvent 专用模块、Prometheus 评估与通知分发。
 - **验收标准**：可配置规则并触发告警事件与通知。
 - **不做什么**：不做复杂事件关联引擎。
 - **主要风险**：告警风暴 → 分级与抑制策略。
 
-## Phase 7：配置与密钥中心
+## Phase 7：配置与密钥中心（由 GovernanceRecord 支撑最小闭环）
 
 - **目标**：配置版本管理、密钥元数据与外部 Store 对接。
 - **前置条件**：Phase 3。
-- **核心交付物**：Configuration 版本化、SecretMetadata、外部 Store 适配。
+- **核心交付物**：当前以 `GovernanceRecord` 的 `CONFIGURATION` / `SECRET_METADATA` 保存控制面元数据；后续补齐 Configuration 版本化、SecretMetadata 专用模型与外部 Store 适配。
 - **验收标准**：配置可版本化回滚；密钥引用可轮换且不入库真实值。
 - **不做什么**：不自建加密存储。
 - **主要风险**：密钥泄露 → 元数据层 + 外部 Store + 审计。
 
-## Phase 8：发布与环境管理
+## Phase 8：发布与环境管理（由 GovernanceRecord 支撑最小闭环）
 
 - **目标**：部署记录、版本、环境配置、CI/CD Webhook。
 - **前置条件**：Phase 2。
-- **核心交付物**：Deployment 模块、Webhook 接收、版本与环境视图。
+- **核心交付物**：当前以 `GovernanceRecord` 的 `DEPLOYMENT` 保存发布记录；后续补齐 Deployment 专用模块、Webhook 接收、版本与环境视图。
 - **验收标准**：部署事件可上报并关联服务/环境/版本。
 - **不做什么**：不执行部署、不替代 CI/CD。
 - **主要风险**：与外部 CI/CD 耦合 → 只接收事件。
 
-## Phase 9：异步任务中心
+## Phase 9：异步任务中心（由 GovernanceRecord 支撑最小闭环）
 
 - **目标**：异步任务定义、调度、状态追踪。
 - **前置条件**：Phase 3、Phase 1（MQ）。
-- **核心交付物**：Task 模块、基于外部 MQ 的调度、状态追踪。
+- **核心交付物**：当前以 `GovernanceRecord` 的 `TASK` 保存任务控制面状态；后续补齐外部 MQ 调度、执行器与状态追踪。
 - **验收标准**：可定义并追踪任务执行状态。
 - **不做什么**：不自建 MQ、不做复杂工作流引擎。
 - **主要风险**：任务积压 → 监控与丢弃策略。
 
-## Phase 10：文件、通知、功能开关
+## Phase 10：文件、通知、功能开关（由 GovernanceRecord 支撑最小闭环）
 
 - **目标**：对象存储封装、多渠道通知、功能开关。
 - **前置条件**：Phase 9。
-- **核心交付物**：File 模块、Notification 模块、FeatureFlag 模块。
+- **核心交付物**：当前以 `GovernanceRecord` 的 `FILE_OBJECT` / `NOTIFICATION` / `FEATURE_FLAG` 保存元数据；后续补齐对象存储、通知渠道与开关评估。
 - **验收标准**：可上传/下载文件、发送通知、控制开关。
 - **不做什么**：不自建对象存储。
 - **主要风险**：文件权限越权 → 项目级隔离。
 
-## Phase 11：模型网关与成本配额
+## Phase 11：模型网关与成本配额（由 GovernanceRecord 支撑最小闭环）
 
 - **目标**：统一模型调用入口、路由降级、用量记录、成本统计、配额限流。
 - **前置条件**：Phase 5。
-- **核心交付物**：ModelGateway 模块、UsageRecord/CostRecord 聚合、配额与熔断。
+- **核心交付物**：当前以 `GovernanceRecord` 的 `MODEL_ROUTE` / `USAGE_RECORD` / `COST_RECORD` 保存控制面与聚合数据；后续补齐模型 Provider、配额与熔断。
 - **验收标准**：模型调用经网关，用量与成本可统计，超额可限流。
 - **不做什么**：不自研模型、不存全量调用明细（进时序库）。
 - **主要风险**：模型成本失控 → 配额 + 熔断 + 预警。
 
-## Phase 12：Prompt 版本与模型评测
+## Phase 12：Prompt 版本与模型评测（由 GovernanceRecord 支撑最小闭环）
 
 - **目标**：Prompt 版本管理、模型评测。
 - **前置条件**：Phase 11。
-- **核心交付物**：PromptVersion 模块、评测流程。
+- **核心交付物**：当前以 `GovernanceRecord` 的 `PROMPT_VERSION` / `EVALUATION_RUN` 保存版本与评测元数据；后续补齐 PromptVersion 专用模块与评测流程。
 - **验收标准**：Prompt 可版本化，评测可对比。
 - **不做什么**：不做通用 MLOps 平台。
 - **主要风险**：评测标准主观 → 提供可配置评测维度。
@@ -151,4 +161,5 @@ flowchart LR
 
 - [总体架构](./01-architecture.md)
 - [领域模型](./02-domain-model.md)
+- [分阶段技术方案](./09-phased-technical-plan.md)
 - [风险分析](./07-risks.md)

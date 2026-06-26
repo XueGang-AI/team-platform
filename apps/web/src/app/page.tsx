@@ -1,10 +1,11 @@
 import { getWebEnv } from '@/lib/env';
+import { ProjectRegistryDashboard } from '@/components/ProjectRegistryDashboard';
 import { StatusDashboard } from '@/components/StatusDashboard';
 
 /**
  * 管理后台首页（Server Component）。
  *
- * Phase 1 仅展示真实系统状态，不含任何业务数据。
+ * 当前首页展示项目服务目录、权限治理入口与真实系统状态。
  * - 项目名称、当前阶段为静态事实，直接渲染。
  * - 组件状态由子组件 StatusDashboard（Client）通过 API 健康端点实时获取。
  * - WEB_API_BASE_URL 在服务端用 loadEnv(webEnvSchema) 校验后作为 prop 注入，
@@ -24,7 +25,7 @@ export default function HomePage() {
             项目名称：<strong>team-platform</strong>
           </span>
           <span>
-            当前阶段：<strong>Phase 1 · 工程骨架与本地基础设施</strong>
+            当前阶段：<strong>Phase 6-12 · 治理中枢本地完整闭环</strong>
           </span>
           <span>
             环境：<strong>{env.ENVIRONMENT}</strong>
@@ -32,6 +33,7 @@ export default function HomePage() {
         </div>
       </header>
 
+      <ProjectRegistryDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
       <StatusDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
     </main>
   );

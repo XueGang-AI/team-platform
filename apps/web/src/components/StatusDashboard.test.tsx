@@ -65,13 +65,12 @@ describe('StatusDashboard 初始渲染', () => {
     expect(markup).toContain('通过 API /health/ready 上报');
   });
 
-  it('包含 Phase 2 说明文案', () => {
-    expect(markup).toContain('项目治理业务将在 Phase 2 开始实现');
-    expect(markup).toContain('无业务数据');
+  it('包含当前控制面说明文案', () => {
+    expect(markup).toContain('项目治理控制面由平台 API 提供');
   });
 
-  it('不包含任何虚假业务数据（项目数/用户数/告警/成本/图表）', () => {
-    expect(markup).not.toMatch(/项目数|用户数|告警数|成本|图表|趋势|统计/);
+  it('状态面板只展示基础设施状态，不承载业务详情', () => {
+    expect(markup).not.toMatch(/服务凭证|治理记录|Manifest 接入/);
   });
 
   it('Web 自身状态恒为正常，不进入 loading', () => {

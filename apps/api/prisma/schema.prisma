@@ -1,13 +1,14 @@
 // Prisma schema - team-platform 控制面
 //
-// Phase 1：仅建立基础设施连接，不创建任何业务表。
-// Project / User / Service / Environment / Deployment / Alert 等业务模型
-// 在 Phase 2 起按需通过 `prisma migrate dev` 增量引入。
+// Phase 2：项目注册与服务目录。
+// 实体：Project / Service / Environment / ServiceEndpoint。
+// Phase 3：身份、权限、服务凭证、审计事件。
+// 不物理删除，归档使用软归档（archivedAt + status=ARCHIVED）。
 //
 // Prisma 7：datasource.url 已从 schema 移除，连接串通过 prisma.config.ts
 // 提供，运行时通过 @prisma/adapter-pg driver adapter 注入 PrismaClient。
 //
-// schema 与生成产物都归属 apps/api（单一消费者，模块化单体）。
+// schema 与生成产物都归属 apps/api（单一消费者）。
 // 生成产物输出到 src/generated/prisma（不入库），由 API 直接消费，CJS moduleFormat。
 
 generator client {
@@ -18,4 +19,332 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ============ 枚举 ============
+
+enum ProjectType {
+  WEB_APPLICATION
+  API_SERVICE
+  AI_APPLICATION
+  DATA_SERVICE
+  INTERNAL_TOOL
+  OTHER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  MAINTENANCE
+  ARCHIVED
+}
+
+enum ServiceType {
+  WEB
+  API
+  WORKER
+  SCHEDULER
+  MODEL_SERVICE
+  DATA_SERVICE
+  OTHER
+}
+
+enum ServiceStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum EnvironmentStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum HealthStatus {
+  UNKNOWN
+  HEALTHY
+  UNHEALTHY
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum ProjectRole {
+  OWNER
+  MAINTAINER
+  DEVELOPER
+  VIEWER
+}
+
+enum ServiceCredentialStatus {
+  ACTIVE
+  ROTATED
+  REVOKED
+}
+
+enum ActorType {
+  USER
+  SERVICE
+  SYSTEM
+}
+
+enum ObservabilitySignal {
+  LOGS
+  METRICS
+  TRACES
+  DASHBOARD
+}
+
+enum GovernanceRecordKind {
+  ALERT_RULE
+  ALERT_EVENT
+  CONFIGURATION
+  SECRET_METADATA
+  DEPLOYMENT
+  TASK
+  FILE_OBJECT
+  NOTIFICATION
+  FEATURE_FLAG
+  MODEL_ROUTE
+  USAGE_RECORD
+  COST_RECORD
+  PROMPT_VERSION
+  EVALUATION_RUN
+}
+
+// ============ Project ============
+
+model Project {
+  id              String        @id @default(uuid())
+  slug            String        @unique
+  name            String
+  description     String?
+  type            ProjectType
+  status          ProjectStatus @default(ACTIVE)
+  ownerName       String
+  ownerEmail      String?
+  repositoryUrl   String?
+  documentationUrl String?
+  tags            Json          @default("[]")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  archivedAt      DateTime?
+
+  services      Service[]
+  environments  Environment[]
+  members       ProjectMember[]
+  auditEvents   AuditEvent[]
+  observabilityLinks ObservabilityLink[]
+  governanceRecords GovernanceRecord[]
+
+  @@index([status])
+  @@index([type])
+  @@index([ownerName])
+  @@index([ownerEmail])
+  @@index([createdAt])
+  @@index([archivedAt])
+}
+
+// ============ User / ProjectMember ============
+
+model User {
+  id          String      @id @default(uuid())
+  email       String      @unique
+  name        String
+  avatarUrl   String?
+  status      UserStatus  @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  disabledAt  DateTime?
+
+  projectMembers ProjectMember[]
+  auditEvents     AuditEvent[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ProjectMember {
+  id         String      @id @default(uuid())
+  projectId  String
+  userId     String
+  role       ProjectRole
+  joinedAt   DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([role])
+}
+
+// ============ Service ============
+
+model Service {
+  id          String        @id @default(uuid())
+  projectId   String
+  slug        String
+  name        String
+  type        ServiceType
+  description String?
+  status      ServiceStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  archivedAt  DateTime?
+
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  endpoints ServiceEndpoint[]
+  credentials ServiceCredential[]
+  observabilityLinks ObservabilityLink[]
+  governanceRecords GovernanceRecord[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@index([status])
+}
+
+// ============ ServiceCredential ============
+
+model ServiceCredential {
+  id              String                    @id @default(uuid())
+  serviceId       String
+  environmentSlug String
+  name            String
+  tokenHash       String
+  status          ServiceCredentialStatus   @default(ACTIVE)
+  issuedAt        DateTime                  @default(now())
+  rotatedAt       DateTime?
+  revokedAt       DateTime?
+  expiresAt       DateTime?
+  createdByUserId String?
+
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  @@index([serviceId])
+  @@index([environmentSlug])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+// ============ Environment ============
+
+model Environment {
+  id          String             @id @default(uuid())
+  projectId   String
+  slug        String
+  name        String
+  description String?
+  status      EnvironmentStatus  @default(ACTIVE)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  archivedAt  DateTime?
+
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  endpoints ServiceEndpoint[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@index([status])
+}
+
+// ============ ServiceEndpoint ============
+
+model ServiceEndpoint {
+  id                  String        @id @default(uuid())
+  serviceId           String
+  environmentId       String
+  baseUrl             String
+  healthCheckPath     String?
+  healthCheckEnabled  Boolean       @default(false)
+  lastHealthStatus    HealthStatus  @default(UNKNOWN)
+  lastCheckedAt       DateTime?
+  lastLatencyMs       Int?
+  lastErrorCode       String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  service     Service     @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  environment Environment @relation(fields: [environmentId], references: [id], onDelete: Restrict)
+
+  @@unique([serviceId, environmentId])
+  @@index([serviceId])
+  @@index([environmentId])
+  @@index([lastHealthStatus])
+}
+
+// ============ AuditEvent ============
+
+model AuditEvent {
+  id          String     @id @default(uuid())
+  actorType   ActorType
+  actorId     String?
+  action      String
+  targetType  String
+  targetId    String
+  projectId   String?
+  payload     Json       @default("{}")
+  ip          String?
+  createdAt   DateTime   @default(now())
+
+  actor   User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([actorType])
+  @@index([actorId])
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([projectId])
+  @@index([createdAt])
+}
+
+// ============ ObservabilityLink ============
+
+model ObservabilityLink {
+  id              String               @id @default(uuid())
+  projectId       String
+  serviceId       String?
+  environmentSlug String?
+  signal          ObservabilitySignal
+  title           String
+  url             String
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([serviceId])
+  @@index([environmentSlug])
+  @@index([signal])
+}
+
+// ============ GovernanceRecord ============
+
+model GovernanceRecord {
+  id              String                @id @default(uuid())
+  projectId       String
+  serviceId       String?
+  environmentSlug String?
+  kind            GovernanceRecordKind
+  name            String
+  status          String
+  data            Json                  @default("{}")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([serviceId])
+  @@index([environmentSlug])
+  @@index([kind])
+  @@index([status])
+  @@index([createdAt])
 }

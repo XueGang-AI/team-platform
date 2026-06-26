@@ -5,7 +5,7 @@
 
 ## 1. 架构总览
 
-平台采用**模块化单体（Modular Monolith）**作为第一阶段架构，控制面与数据面分离，优先集成成熟开源组件而非重造基础设施。
+平台采用**模块化单体（Modular Monolith）**，控制面与数据面分离，优先集成成熟开源组件而非重造基础设施。当前本地成品闭环已经包含管理后台、平台 API、接入协议、SDK/CLI、项目注册、权限、服务凭证、审计、可观测性入口与治理中枢。
 
 ```mermaid
 flowchart TB
@@ -25,14 +25,14 @@ flowchart TB
             AUTH["身份与权限"]
             CRED["服务凭证"]
             OBS["可观测性适配层"]
-            CFG["配置/密钥适配层"]
-            ALERT["告警中心"]
-            REL["发布与环境"]
-            TASK["任务中心"]
-            FILE["文件服务"]
-            NOTIFY["通知中心"]
-            MODEL["模型网关"]
-            COST["成本与配额"]
+            GOV["治理中枢<br/>GovernanceRecord + 专用 API facade"]
+            CFG["配置/密钥元数据"]
+            ALERT["告警"]
+            REL["发布"]
+            TASK["任务"]
+            FILE["文件元数据"]
+            NOTIFY["通知"]
+            MODEL["模型/成本/Prompt/评测"]
             AUDIT["审计系统"]
         end
         API --- 核心模块
@@ -60,9 +60,10 @@ flowchart TB
     API --> REDIS
     ADMIN -->|"跳转/嵌入"| GRAFANA
     CFG --> SECRET
-    FILE --> S3
-    TASK --> MQ
-    NOTIFY --> MQ
+    GOV --> PG
+    FILE -. "生产接入时启用" .-> S3
+    TASK -. "生产接入时启用" .-> MQ
+    NOTIFY -. "生产接入时启用" .-> MQ
     AUDIT --> PG
 ```
 
@@ -81,22 +82,17 @@ flowchart TB
 
 模块化单体按业务域划分 NestJS Module，模块间通过接口依赖注入而非直接 import 实现，保证未来可拆。下表标注每个模块的建设阶段（详见 [开发路线](./05-roadmap.md)）：
 
-| 模块 | 职责 | 首次实现阶段 |
-|------|------|--------------|
-| 项目注册中心（Project Registry） | 项目、服务、环境、成员、依赖的注册与查询 | Phase 2 |
-| 身份与权限（Auth） | 用户认证、项目级 RBAC、Token 管理 | Phase 3 |
-| 服务凭证（ServiceCredential） | 服务身份凭证的签发、轮换、吊销 | Phase 3 |
-| 可观测性适配层（Observability） | OpenTelemetry 接收、日志/指标/Trace 关联与跳转 | Phase 4 |
-| 配置/密钥适配层（Config & Secret） | 配置版本管理、密钥元数据与外部 Store 对接 | Phase 7 |
-| 告警中心（Alert） | 告警规则、告警事件、通知分发 | Phase 6 |
-| 发布与环境管理（Release） | 部署记录、版本、环境配置 | Phase 8 |
-| 任务中心（Task） | 异步任务定义、调度、状态追踪 | Phase 9 |
-| 文件服务（File） | 对象存储封装、上传/下载 | Phase 10 |
-| 通知中心（Notification） | 多渠道通知（Slack/邮件/Webhook） | Phase 10 |
-| 功能开关（FeatureFlag） | 开关定义、灰度、评估 | Phase 10 |
-| 模型网关（ModelGateway） | 统一模型调用入口、路由、降级 | Phase 11 |
-| 成本与配额（Cost & Quota） | 用量记录、成本统计、配额限流 | Phase 11 |
-| 审计系统（Audit） | 审计事件独立存储、高风险操作记录 | Phase 3 起持续 |
+| 模块 | 当前职责 | 当前实现状态 |
+|------|----------|--------------|
+| 项目注册中心（Project Registry） | 项目、服务、环境、端点、manifest validate/apply、健康检查 | 已实现专用模块 |
+| 身份与权限（Auth） | 本地邮箱登录、Bearer token、项目级 RBAC | 已实现专用模块 |
+| 服务凭证（ServiceCredential） | 服务身份凭证签发、轮换、吊销 | 已实现于 Project Registry 安全服务 |
+| 可观测性适配层（Observability） | 保存 Loki/Prometheus/Tempo/Grafana 等入口链接；原始数据留在数据面 | 已实现专用模块 |
+| 治理中枢（Governance） | 告警、发布、配置/密钥、任务、功能开关、模型路由、成本、Prompt、评测控制面元数据 | 已实现 `GovernanceRecord` + 专用 API facade |
+| 审计系统（Audit） | 审计事件独立存储、高风险操作记录 | 已实现专用模块 |
+| Web 管理后台 | 项目目录、详情、权限、凭证、可观测性、治理总览 | 已实现 |
+| CLI / SDK | 登录、manifest、项目查询、治理总览与治理记录创建 | 已实现 TypeScript / Python / CLI |
+| 外部 Secret Store / 通知 / CI/CD Webhook / 对象存储 / 模型 Provider | 生产账号、凭据和真实服务接入 | 保留边界，配置型接入，不在仓库内写真实配置 |
 
 ## 4. 控制面与数据面
 
@@ -145,11 +141,11 @@ flowchart TB
 | `project.yaml` | 声明式项目元数据，CI/手工同步 | 是（Phase 2 校验） |
 | 管理后台手工注册 | UI 录入，兜底 | 是（Phase 2） |
 | 平台 API | 所有接入方式底层都走 API | 是（Phase 2） |
-| TypeScript SDK | 运行时能力（日志/指标/trace/配置/鉴权/模型网关） | 否（Phase 5） |
-| Python SDK | 同能力 Python 版 | 否（Phase 5） |
-| CLI | 管理操作（注册/校验/发布/轮换/查询） | 否（Phase 5） |
-| CI/CD Webhook | 部署事件上报 | 否（Phase 8） |
-| OpenTelemetry | 可观测性数据采集标准协议 | 否（Phase 4） |
+| TypeScript SDK | 登录、项目查询、manifest validate/apply、治理总览与治理记录创建 | 是 |
+| Python SDK | 登录、项目查询、manifest validate/apply、治理总览与治理记录创建 | 是 |
+| CLI | 登录、manifest 校验/apply、项目查询、治理总览、治理记录创建 | 是 |
+| CI/CD Webhook | 部署事件上报 | 预留，生产接入时配置 |
+| OpenTelemetry | 可观测性数据采集标准协议 | 本地数据面骨架已提供 |
 
 详细协议见 [项目接入协议](./03-project-integration.md)。
 
@@ -173,7 +169,7 @@ flowchart TB
 
 ## 7. 基础设施边界
 
-- **第一阶段**：Docker Compose 本地编排 PostgreSQL / Redis / Loki / Prometheus / Tempo / Grafana。不引入 Kubernetes。
+- **当前本地基础设施**：Docker Compose 编排 PostgreSQL、Redis、OpenTelemetry Collector、Prometheus、Loki、Tempo、Grafana。不引入 Kubernetes。
 - **未来演进**：当多环境、多集群、自动伸缩等需求真实出现时，再评估容器编排平台。在此之前，Docker Compose 或单机部署足以覆盖团队内部规模。
 
 ## 8. 架构决策记录
@@ -183,6 +179,7 @@ flowchart TB
 - [ADR-0001 采用模块化单体](./adr/0001-modular-monolith.md)
 - [ADR-0002 控制面与数据面分离](./adr/0002-control-plane-data-plane.md)
 - [ADR-0003 可观测性集成而非重造](./adr/0003-observability-integration.md)
+- [ADR-0004 Prisma schema 下沉到 apps/api](./adr/0004-database-schema-location.md)
 
 ## 9. 相关文档
 

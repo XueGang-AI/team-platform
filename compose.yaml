@@ -1,5 +1,4 @@
-# Phase 1 本地基础设施：仅 PostgreSQL + Redis
-# 可观测性组件（Loki/Prometheus/Tempo/Grafana 等）在 Phase 4 引入。
+# 本地基础设施：PostgreSQL + Redis + Phase 4 可观测性组件。
 name: team-platform
 
 services:
@@ -38,8 +37,79 @@ services:
       retries: 10
       start_period: 5s
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.139.0
+    container_name: team-platform-otel-collector
+    restart: unless-stopped
+    command: ['--config=/etc/otelcol-contrib/config.yaml']
+    volumes:
+      - ./infra/observability/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - '4317:4317'
+      - '4318:4318'
+      - '9464:9464'
+    depends_on:
+      - tempo
+      - prometheus
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    container_name: team-platform-prometheus
+    restart: unless-stopped
+    command: ['--config.file=/etc/prometheus/prometheus.yml']
+    volumes:
+      - ./infra/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - '9090:9090'
+
+  loki:
+    image: grafana/loki:3.5.8
+    container_name: team-platform-loki
+    restart: unless-stopped
+    command: ['-config.file=/etc/loki/local-config.yaml']
+    ports:
+      - '3100:3100'
+
+  tempo:
+    image: grafana/tempo:2.9.0
+    container_name: team-platform-tempo
+    restart: unless-stopped
+    user: '0'
+    command: ['-config.file=/etc/tempo.yaml']
+    volumes:
+      - ./infra/observability/tempo.yaml:/etc/tempo.yaml:ro
+      - tempo_data:/tmp/tempo
+    ports:
+      - '3200:3200'
+      - '4319:4317'
+
+  grafana:
+    image: grafana/grafana:12.3.0
+    container_name: team-platform-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+    volumes:
+      - ./infra/observability/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - '3002:3000'
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+
 volumes:
   postgres_data:
     name: team-platform-postgres-data
   redis_data:
     name: team-platform-redis-data
+  prometheus_data:
+    name: team-platform-prometheus-data
+  tempo_data:
+    name: team-platform-tempo-data
+  grafana_data:
+    name: team-platform-grafana-data

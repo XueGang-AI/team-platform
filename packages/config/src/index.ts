@@ -31,6 +31,10 @@ export const apiEnvSchema = baseEnvSchema.extend({
     .refine((v) => v.startsWith('redis://') || v.startsWith('rediss://'), {
       message: 'REDIS_URL 必须是 redis:// 连接串',
     }),
+  HEALTH_CHECK_ALLOWED_HOSTS: z.string().default(''),
+  HEALTH_CHECK_TIMEOUT_MS: z.coerce.number().int().positive().default(3000),
+  HEALTH_CHECK_MAX_CONCURRENCY: z.coerce.number().int().positive().default(5),
+  AUTH_TOKEN_SECRET: z.string().min(16).default('team-platform-local-dev-secret'),
 });
 
 /** Web（管理后台）专属环境变量 */

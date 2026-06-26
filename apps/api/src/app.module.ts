@@ -4,10 +4,15 @@ import { APP_FILTER } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { apiEnvSchema, loadEnv } from '@team-platform/config';
 import { LOG_REDACTION_PATHS } from '@team-platform/logger';
+import { AuditModule } from './audit/audit.module';
+import { AuthModule } from './auth/auth.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { GovernanceModule } from './governance/governance.module';
 import { resolveRequestId } from './common/request-id/request-id';
 import { HealthModule } from './health/health.module';
+import { ObservabilityModule } from './observability/observability.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ProjectRegistryModule } from './project-registry/project-registry.module';
 import { RedisModule } from './redis/redis.module';
 import { VersionModule } from './version/version.module';
 
@@ -42,8 +47,13 @@ import { VersionModule } from './version/version.module';
     }),
     PrismaModule,
     RedisModule,
+    AuthModule,
+    AuditModule,
     HealthModule,
     VersionModule,
+    ProjectRegistryModule,
+    ObservabilityModule,
+    GovernanceModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

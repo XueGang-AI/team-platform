@@ -5,7 +5,7 @@ on:
     branches: [main]
   pull_request:
 
-# Phase 1.5 CI：
+# CI：
 # - quality：格式 / Lint / 类型检查 / 单元测试 / 构建（无需外部服务）
 # - integration：集成测试（PostgreSQL + Redis service containers）
 # 两个 job 并行执行，均不部署、不发布、不提交、不使用生产密钥。

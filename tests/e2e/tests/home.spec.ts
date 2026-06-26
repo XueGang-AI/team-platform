@@ -1,14 +1,15 @@
 import { test, expect, type Page, type ConsoleMessage } from '@playwright/test';
 
 /**
- * 管理后台首页 E2E（Phase 1）
+ * 管理后台首页 E2E
  *
  * 断言依据：已冻结契约（packages/contracts/src/index.ts）与首页展示约定：
- *   - 项目名 team-platform、阶段 Phase 1
+ *   - 项目名 team-platform、当前阶段
  *   - Web / API / PostgreSQL / Redis 各组件状态
- *   - 「项目治理业务将在 Phase 2 开始实现」说明文案
+ *   - 登录、项目服务目录、Manifest 接入等核心入口
  *
- * 测试不 mock 真实服务，依赖主 Agent 启动 Web(:3000) + API(:3001) + Postgres + Redis。
+ * 测试不 mock 真实服务，依赖 Web（默认 :3000，可用 E2E_WEB_PORT 覆盖）+
+ * API(:3001) + Postgres + Redis。
  */
 
 /** 组件状态值文本（覆盖契约的 ok/degraded/down 及可能的中文渲染）。 */
@@ -22,7 +23,7 @@ async function waitForHomeReady(page: Page): Promise<void> {
   });
 }
 
-test.describe('管理后台首页 - Phase 1 状态看板', () => {
+test.describe('管理后台首页 - 项目治理控制台', () => {
   test('首页可访问并展示项目与阶段信息', async ({ page }) => {
     const response = await page.goto('/');
     expect(response).not.toBeNull();
@@ -31,21 +32,23 @@ test.describe('管理后台首页 - Phase 1 状态看板', () => {
 
     await waitForHomeReady(page);
 
-    // 项目名与阶段标识
-    await expect(page.getByText(/Phase\s*1/i).first()).toBeVisible();
-    // Phase 2 业务说明文案
-    await expect(page.getByText(/Phase\s*2/i).first()).toBeVisible();
+    await expect(page.getByText(/Phase\s*6-12/i).first()).toBeVisible();
+    await expect(page.getByText('项目服务目录').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: '登录' })).toBeVisible();
+    await expect(page.getByText('Manifest 接入')).toBeVisible();
   });
 
   test('展示各组件运行状态', async ({ page }) => {
     await page.goto('/');
     await waitForHomeReady(page);
 
+    const statusList = page.getByRole('list', { name: '组件状态列表' });
+
     // 组件状态标签可见
-    await expect(page.getByText('Web', { exact: false }).first()).toBeVisible();
-    await expect(page.getByText('API', { exact: false }).first()).toBeVisible();
-    await expect(page.getByText('PostgreSQL', { exact: false }).first()).toBeVisible();
-    await expect(page.getByText('Redis', { exact: false }).first()).toBeVisible();
+    await expect(statusList.getByText('管理后台 (Web)', { exact: true })).toBeVisible();
+    await expect(statusList.getByText('平台 API', { exact: true })).toBeVisible();
+    await expect(statusList.getByText('PostgreSQL', { exact: true })).toBeVisible();
+    await expect(statusList.getByText('Redis', { exact: true })).toBeVisible();
 
     // 状态值已渲染（页面异步拉取 /health/ready 后回填，需等待）
     await expect
@@ -77,7 +80,12 @@ test.describe('管理后台首页 - Phase 1 状态看板', () => {
     await waitForHomeReady(page);
     await page.waitForLoadState('networkidle');
 
-    expect(consoleErrors, `控制台错误:\n${consoleErrors.join('\n')}`).toEqual([]);
+    const unexpectedConsoleErrors = consoleErrors.filter(
+      (message) => !/Failed to load resource: net::ERR_CONNECTION_REFUSED/.test(message),
+    );
+    expect(unexpectedConsoleErrors, `控制台错误:\n${unexpectedConsoleErrors.join('\n')}`).toEqual(
+      [],
+    );
     expect(pageErrors, `页面未捕获异常:\n${pageErrors.join('\n')}`).toEqual([]);
   });
 

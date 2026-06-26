@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webPort = process.env.E2E_WEB_PORT ?? '3000';
+const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${webPort}`;
+
 /**
  * team-platform E2E 配置（Phase 1）
  *
@@ -9,6 +12,8 @@ import { defineConfig, devices } from '@playwright/test';
  *   2. pnpm --filter @team-platform/api start   → API :3001（需 DATABASE_URL / REDIS_URL）
  *   3. pnpm --filter @team-platform/web start   → Web :3000（需先 `pnpm --filter @team-platform/web build`）
  *   4. pnpm --filter @team-platform/e2e exec playwright install chromium
+ *
+ * 如 3000 已被被接入项目占用，可设置 E2E_WEB_PORT=3004。
  *
  * webServer 策略：
  *   - reuseExistingServer: true：主 Agent 已启动 Web 时，Playwright 仅做 URL 探测，不重复启动。
@@ -29,7 +34,7 @@ export default defineConfig({
     timeout: 10_000,
   },
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -45,8 +50,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm --filter @team-platform/web start',
-    url: 'http://localhost:3000',
+    command: `pnpm --filter @team-platform/web exec next start -p ${webPort}`,
+    url: baseURL,
     reuseExistingServer: true,
     timeout: 120_000,
     stdout: 'ignore',
