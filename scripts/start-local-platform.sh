@@ -37,6 +37,34 @@ assert_port_free() {
   fi
 }
 
+wait_port_free() {
+  local port="$1"
+  local attempts="${2:-20}"
+  for _ in $(seq 1 "$attempts"); do
+    if ! lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 0.5
+  done
+  assert_port_free "$port"
+}
+
+stop_platform_port() {
+  local port="$1"
+  local pids
+  pids="$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
+  if [[ -z "$pids" ]]; then
+    return 0
+  fi
+  for pid in $pids; do
+    local cwd
+    cwd="$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | awk '/^n/ { print substr($0, 2); exit }')"
+    if [[ "$cwd" == "$ROOT_DIR"* ]]; then
+      kill "$pid" >/dev/null 2>&1 || true
+    fi
+  done
+}
+
 require_command docker
 require_command pnpm
 require_command screen
@@ -60,7 +88,10 @@ fi
 
 stop_screen team-platform-api
 stop_screen team-platform-web
-sleep 1
+stop_platform_port "$API_PORT"
+stop_platform_port "$WEB_PORT"
+wait_port_free "$API_PORT"
+wait_port_free "$WEB_PORT"
 assert_port_free "$API_PORT"
 assert_port_free "$WEB_PORT"
 

@@ -1,6 +1,18 @@
 import { getWebEnv } from '@/lib/env';
 import { ProjectRegistryDashboard } from '@/components/ProjectRegistryDashboard';
 import { StatusDashboard } from '@/components/StatusDashboard';
+import {
+  Activity,
+  Bell,
+  BookOpen,
+  Boxes,
+  ClipboardList,
+  Gauge,
+  KeyRound,
+  Rocket,
+  Server,
+  WalletCards,
+} from 'lucide-react';
 
 /**
  * 管理后台首页（Server Component）。
@@ -17,42 +29,84 @@ export default function HomePage() {
   const env = getWebEnv();
 
   return (
-    <main id="main" className="page">
-      <header className="page-header">
-        <h1>团队项目治理平台</h1>
-        <div className="meta">
-          <span>
-            项目名称：<strong>team-platform</strong>
-          </span>
-          <span>
-            平台入口：<strong>项目目录 · 接入协议 · 权限凭证 · 治理中枢</strong>
-          </span>
-          <span>
-            当前阶段：<strong>Phase 6-12 · 本地完整闭环</strong>
-          </span>
-          <span>
-            环境：<strong>{env.ENVIRONMENT}</strong>
-          </span>
+    <main id="main" className="app-shell">
+      <aside className="app-sidebar" aria-label="平台导航">
+        <div className="brand-block">
+          <span className="brand-mark">TP</span>
+          <div>
+            <h1>团队项目治理平台</h1>
+            <p>{env.ENVIRONMENT}</p>
+          </div>
         </div>
-      </header>
+        <nav className="side-nav">
+          <a href="#overview">
+            <Gauge aria-hidden="true" />
+            总览
+          </a>
+          <a href="#catalog">
+            <Boxes aria-hidden="true" />
+            项目目录
+          </a>
+          <a href="#services">
+            <Server aria-hidden="true" />
+            服务与环境
+          </a>
+          <a href="#health">
+            <Activity aria-hidden="true" />
+            健康状态
+          </a>
+          <a href="#governance">
+            <Bell aria-hidden="true" />
+            告警治理
+          </a>
+          <a href="#release">
+            <Rocket aria-hidden="true" />
+            发布记录
+          </a>
+          <a href="#cost">
+            <WalletCards aria-hidden="true" />
+            成本
+          </a>
+          <a href="#access">
+            <KeyRound aria-hidden="true" />
+            权限凭证
+          </a>
+          <a href="#integration">
+            <ClipboardList aria-hidden="true" />
+            接入
+          </a>
+        </nav>
+        <div className="sidebar-links">
+          <a href="/api/platform/docs" target="_blank" rel="noreferrer">
+            <BookOpen aria-hidden="true" />
+            平台 API 文档
+          </a>
+          <a href="http://localhost:3002" target="_blank" rel="noreferrer">
+            <Activity aria-hidden="true" />
+            观测看板
+          </a>
+        </div>
+      </aside>
 
-      <nav className="platform-links" aria-label="平台入口">
-        <a href="/api/platform/docs" target="_blank" rel="noreferrer">
-          平台 API 文档
-        </a>
-        <a href="http://localhost:3002" target="_blank" rel="noreferrer">
-          观测看板
-        </a>
-        <a href="http://localhost:9090" target="_blank" rel="noreferrer">
-          指标查询
-        </a>
-        <a href="http://localhost:3100/ready" target="_blank" rel="noreferrer">
-          日志组件
-        </a>
-      </nav>
+      <div className="app-main">
+        <header className="page-header">
+          <div>
+            <p className="eyebrow">Internal Developer Platform</p>
+            <h2>项目治理工作台</h2>
+          </div>
+          <div className="meta">
+            <span>
+              项目：<strong>team-platform</strong>
+            </span>
+            <span>
+              阶段：<strong>Phase 6-12 · 本地完整闭环</strong>
+            </span>
+          </div>
+        </header>
 
-      <ProjectRegistryDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
-      <StatusDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
+        <ProjectRegistryDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
+        <StatusDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
+      </div>
     </main>
   );
 }

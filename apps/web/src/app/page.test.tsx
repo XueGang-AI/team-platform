@@ -41,7 +41,8 @@ describe('HomePage 首页渲染', () => {
 
   it('显示统一平台入口标题', () => {
     expect(markup).toContain('团队项目治理平台');
-    expect(markup).toContain('项目目录 · 接入协议 · 权限凭证 · 治理中枢');
+    expect(markup).toContain('项目治理工作台');
+    expect(markup).toContain('工程治理总览');
   });
 
   it('显示当前阶段标识', () => {
@@ -50,12 +51,11 @@ describe('HomePage 首页渲染', () => {
   });
 
   it('显示当前环境标识（来自环境变量）', () => {
-    expect(markup).toContain('环境：');
     expect(markup).toContain('dev');
   });
 
   it('包含项目服务目录与系统状态区域', () => {
-    expect(markup).toContain('项目服务目录');
+    expect(markup).toContain('项目目录');
     expect(markup).toContain('平台基础设施');
   });
 
@@ -68,6 +68,8 @@ describe('HomePage 首页渲染', () => {
   it('包含多阶段治理入口', () => {
     expect(markup).toContain('Manifest 接入');
     expect(markup).toContain('新建项目');
+    expect(markup).toContain('告警治理');
+    expect(markup).toContain('权限凭证');
   });
 
   it('使用语义化主区域与标题层级', () => {
