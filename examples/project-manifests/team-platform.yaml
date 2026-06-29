@@ -35,13 +35,13 @@ spec:
   endpoints:
     - service: web
       environment: development
-      baseUrl: http://localhost:3000
+      baseUrl: http://localhost:3200
       healthCheck:
         enabled: false
 
     - service: api
       environment: development
-      baseUrl: http://localhost:3001
+      baseUrl: http://localhost:3201
       healthCheck:
         enabled: true
         path: /health/ready

@@ -23,7 +23,7 @@ async function bootstrap(): Promise<void> {
 
   const config = app.get(ConfigService);
   const host = config.get<string>('API_HOST') ?? '0.0.0.0';
-  const port = config.get<number>('API_PORT') ?? 3001;
+  const port = config.get<number>('API_PORT') ?? 3201;
 
   // OpenAPI 文档挂在 /docs
   const swaggerConfig = new DocumentBuilder()

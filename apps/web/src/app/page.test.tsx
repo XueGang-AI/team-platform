@@ -21,9 +21,9 @@ beforeEach(() => {
   // NODE_ENV 在 @types/node 中为只读，且 schema 已有默认值，故不赋值。
   process.env.ENVIRONMENT = 'dev';
   process.env.LOG_LEVEL = 'info';
-  process.env.WEB_PORT = '3000';
+  process.env.WEB_PORT = '3200';
   process.env.WEB_API_BASE_URL = '/api/platform';
-  process.env.PLATFORM_API_INTERNAL_URL = 'http://localhost:3001';
+  process.env.PLATFORM_API_INTERNAL_URL = 'http://localhost:3201';
 });
 
 afterEach(() => {
@@ -40,23 +40,23 @@ describe('HomePage 首页渲染', () => {
   });
 
   it('显示统一平台入口标题', () => {
-    expect(markup).toContain('团队项目治理平台');
+    expect(markup).toContain('team-platform');
+    expect(markup).toContain('全局工具栏');
     expect(markup).toContain('项目治理工作台');
-    expect(markup).toContain('工程治理总览');
   });
 
-  it('显示当前阶段标识', () => {
-    expect(markup).toContain('Phase 6-12');
-    expect(markup).toContain('本地完整闭环');
+  it('显示当前项目与环境选择器', () => {
+    expect(markup).toContain('Manjv Studio');
+    expect(markup).toContain('本地开发');
   });
 
   it('显示当前环境标识（来自环境变量）', () => {
     expect(markup).toContain('dev');
   });
 
-  it('包含项目服务目录与系统状态区域', () => {
+  it('包含项目服务目录与健康状态入口', () => {
     expect(markup).toContain('项目目录');
-    expect(markup).toContain('平台基础设施');
+    expect(markup).toContain('健康状态');
   });
 
   it('包含平台内部入口', () => {
@@ -66,10 +66,10 @@ describe('HomePage 首页渲染', () => {
   });
 
   it('包含多阶段治理入口', () => {
-    expect(markup).toContain('Manifest 接入');
-    expect(markup).toContain('新建项目');
+    expect(markup).toContain('服务与环境');
     expect(markup).toContain('告警治理');
     expect(markup).toContain('权限凭证');
+    expect(markup).toContain('接入');
   });
 
   it('使用语义化主区域与标题层级', () => {

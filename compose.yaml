@@ -3,6 +3,7 @@ name: team-platform
 
 services:
   postgres:
+    profiles: ['local-db']
     image: postgres:16-alpine
     container_name: team-platform-postgres
     restart: unless-stopped
@@ -10,8 +11,6 @@ services:
       POSTGRES_USER: team_platform
       POSTGRES_PASSWORD: team_platform
       POSTGRES_DB: team_platform
-    ports:
-      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -22,12 +21,11 @@ services:
       start_period: 10s
 
   redis:
+    profiles: ['local-db']
     image: redis:7-alpine
     container_name: team-platform-redis
     restart: unless-stopped
     command: ['redis-server', '--save', '60', '1', '--loglevel', 'warning']
-    ports:
-      - '6380:6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -45,9 +43,9 @@ services:
     volumes:
       - ./infra/observability/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
     ports:
-      - '4317:4317'
-      - '4318:4318'
-      - '9464:9464'
+      - '3224:4317'
+      - '3225:4318'
+      - '3226:9464'
     depends_on:
       - tempo
       - prometheus
@@ -56,20 +54,22 @@ services:
     image: prom/prometheus:v3.7.3
     container_name: team-platform-prometheus
     restart: unless-stopped
-    command: ['--config.file=/etc/prometheus/prometheus.yml']
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.listen-address=0.0.0.0:3221'
     volumes:
       - ./infra/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
-      - '9090:9090'
+      - '3221:3221'
 
   loki:
     image: grafana/loki:3.5.8
     container_name: team-platform-loki
     restart: unless-stopped
-    command: ['-config.file=/etc/loki/local-config.yaml']
+    command: ['-config.file=/etc/loki/local-config.yaml', '-server.http-listen-port=3222']
     ports:
-      - '3100:3100'
+      - '3222:3222'
 
   tempo:
     image: grafana/tempo:2.9.0
@@ -81,8 +81,8 @@ services:
       - ./infra/observability/tempo.yaml:/etc/tempo.yaml:ro
       - tempo_data:/tmp/tempo
     ports:
-      - '3200:3200'
-      - '4319:4317'
+      - '3223:3223'
+      - '3227:4317'
 
   grafana:
     image: grafana/grafana:12.3.0
@@ -91,12 +91,13 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SERVER_HTTP_PORT: '3220'
       GF_USERS_ALLOW_SIGN_UP: 'false'
     volumes:
       - ./infra/observability/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
       - grafana_data:/var/lib/grafana
     ports:
-      - '3002:3000'
+      - '3220:3220'
     depends_on:
       - prometheus
       - loki

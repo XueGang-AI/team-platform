@@ -27,7 +27,7 @@ apiVersion: team-platform.io/v1alpha1
 kind: Project
 ```
 
-平台 API 通过 `POST /project-manifests/validate` 校验，通过 `POST /project-manifests/apply` 幂等应用。apply 的语义是：已存在则更新，缺失则创建，不会自动删除 manifest 未声明的资源。
+平台 API 通过 `POST /project-manifests/validate` 校验，通过 `POST /project-manifests/apply` 幂等应用。apply 的语义是：项目、服务、环境和端点已存在则更新，缺失则创建；同项目内 manifest 不再声明的服务和环境会被软归档并从默认项目详情中隐藏，不做物理删除。仍保留在 manifest 中的服务/环境下，未声明的旧端点不会被物理删除。
 
 ## 3. 字段定义
 
@@ -115,8 +115,8 @@ kind: Project
 CLI：
 
 ```bash
-node apps/cli/dist/index.js validate examples/project-manifests/manjv-studio.yaml --api http://localhost:3001
-node apps/cli/dist/index.js apply examples/project-manifests/manjv-studio.yaml --api http://localhost:3001 --token "$TEAM_PLATFORM_TOKEN"
+node apps/cli/dist/index.js validate examples/project-manifests/manjv-studio.yaml --api http://localhost:3201
+node apps/cli/dist/index.js apply examples/project-manifests/manjv-studio.yaml --api http://localhost:3201 --token "$TEAM_PLATFORM_TOKEN"
 ```
 
 API：
@@ -132,7 +132,8 @@ POST /project-manifests/apply
 - slug 命名规则；
 - endpoint 对 service/environment 的引用合法性；
 - 疑似密钥、Token、含密码连接串扫描；
-- apply 幂等更新，不重复创建已存在的项目、服务、环境、端点。
+- apply 幂等更新，不重复创建已存在的项目、服务、环境、端点；
+- apply 会软归档同项目内 manifest 不再声明的服务和环境，避免旧环境或旧服务继续以真实资源身份出现在当前工作台。
 
 ## 7. 当前完整示例
 
@@ -180,7 +181,7 @@ spec:
   endpoints:
     - service: web
       environment: local
-      baseUrl: http://localhost:3000
+      baseUrl: http://localhost:3100
       healthCheck:
         enabled: true
         path: /api/health

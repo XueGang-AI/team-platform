@@ -609,6 +609,7 @@ export class ProjectRegistryService {
       }
 
       const serviceIds = new Map<string, string>();
+      const manifestServiceSlugs = manifest.spec.services.map((service) => service.slug);
       for (const service of manifest.spec.services) {
         const existing = await tx.service.findUnique({
           where: { projectId_slug: { projectId: project.id, slug: service.slug } },
@@ -630,6 +631,9 @@ export class ProjectRegistryService {
       }
 
       const environmentIds = new Map<string, string>();
+      const manifestEnvironmentSlugs = manifest.spec.environments.map(
+        (environment) => environment.slug,
+      );
       for (const environment of manifest.spec.environments) {
         const existing = await tx.environment.findUnique({
           where: { projectId_slug: { projectId: project.id, slug: environment.slug } },
@@ -648,6 +652,24 @@ export class ProjectRegistryService {
         environmentIds.set(environment.slug, saved.id);
         summary[existing ? 'updated' : 'created'].environments += 1;
       }
+
+      const archivedAt = new Date();
+      await tx.service.updateMany({
+        where: {
+          projectId: project.id,
+          slug: { notIn: manifestServiceSlugs },
+          archivedAt: null,
+        },
+        data: { status: 'ARCHIVED', archivedAt },
+      });
+      await tx.environment.updateMany({
+        where: {
+          projectId: project.id,
+          slug: { notIn: manifestEnvironmentSlugs },
+          archivedAt: null,
+        },
+        data: { status: 'ARCHIVED', archivedAt },
+      });
 
       for (const endpoint of manifest.spec.endpoints) {
         const serviceId = serviceIds.get(endpoint.service);
@@ -712,8 +734,12 @@ export class ProjectRegistryService {
     const project = await this.prisma.project.findUnique({
       where: { slug },
       include: {
-        services: { orderBy: { slug: 'asc' }, include: { endpoints: true } },
-        environments: { orderBy: { slug: 'asc' } },
+        services: {
+          where: { archivedAt: null },
+          orderBy: { slug: 'asc' },
+          include: { endpoints: true },
+        },
+        environments: { where: { archivedAt: null }, orderBy: { slug: 'asc' } },
       },
     });
     if (!project) {

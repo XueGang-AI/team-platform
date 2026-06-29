@@ -26,7 +26,7 @@ spec:
   endpoints:
     - service: api
       environment: dev
-      baseUrl: http://localhost:3001
+      baseUrl: http://localhost:3201
       healthCheck:
         enabled: true
         path: /health/ready
@@ -60,7 +60,7 @@ spec:
   endpoints:
     - service: missing
       environment: dev
-      baseUrl: http://localhost:3001
+      baseUrl: http://localhost:3201
 `);
 
     expect(result.normalized).toBeNull();

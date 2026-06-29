@@ -52,7 +52,7 @@ team-platform/
 │   └── e2e/                    # 跨应用 Playwright E2E 测试
 ├── docs/                       # 架构文档与 ADR
 ├── .github/workflows/          # GitHub Actions CI
-├── compose.yaml                # 本地基础设施（PostgreSQL + Redis + 可观测性组件）
+├── compose.yaml                # 本地基础设施（默认可观测性组件；local-db profile 可选 PG/Redis）
 ├── package.json                # 根 manifest 与 workspace 脚本
 ├── pnpm-workspace.yaml
 ├── pnpm-lock.yaml
@@ -181,8 +181,9 @@ CI 与本地运行相同测试入口。E2E 不在 CI 中运行（需真实浏览
 
 - 本地编排在根 `compose.yaml`（Docker Compose 默认入口）。
 - 说明文档在 `infra/README.md`。
-- 当前本地组件：PostgreSQL、Redis、OpenTelemetry Collector、Prometheus、Loki、Tempo、Grafana。
-- 端口：本地宿主 5433(PG)/6380(Redis)/3002(Grafana)/9090(Prometheus)/3100(Loki)/3200(Tempo)/4317-4318(OTel) 避开常见冲突；CI service container 用默认 5432/6379。
+- 当前默认本地组件：OpenTelemetry Collector、Prometheus、Loki、Tempo、Grafana。
+- PostgreSQL 与 Redis 默认使用机器级通用服务 `127.0.0.1:15432` / `127.0.0.1:16379`；仅在隔离调试时使用 `local-db` profile 启动项目专属 PG/Redis。
+- 端口：本地宿主 15432(PG)/16379(Redis)/3220(Grafana)/3221(Prometheus)/3222(Loki)/3223(Tempo HTTP)/3224-3226(OTel Collector)/3227(Tempo OTLP) 避开常见冲突；CI service container 用默认 5432/6379。
 - 不为无额外配置的组件创建 `infra/postgres/`、`infra/redis/` 空目录。
 
 ## 11. 相关文档

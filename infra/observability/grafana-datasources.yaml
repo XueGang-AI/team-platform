@@ -4,13 +4,13 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus:9090
+    url: http://prometheus:3221
     isDefault: true
   - name: Loki
     type: loki
     access: proxy
-    url: http://loki:3100
+    url: http://loki:3222
   - name: Tempo
     type: tempo
     access: proxy
-    url: http://tempo:3200
+    url: http://tempo:3223

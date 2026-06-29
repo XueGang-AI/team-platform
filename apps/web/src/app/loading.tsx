@@ -7,25 +7,39 @@
  */
 export default function Loading() {
   return (
-    <main id="main" className="page">
-      <header className="page-header">
-        <h1>team-platform 管理后台</h1>
-        <div className="meta">
-          <span>正在加载…</span>
+    <main id="main" className="app-shell">
+      <aside className="app-sidebar" aria-label="平台导航">
+        <div className="brand-block">
+          <span className="brand-mark">TP</span>
+          <div>
+            <h1>团队项目治理平台</h1>
+            <p>loading</p>
+          </div>
         </div>
-      </header>
-      <section className="panel" aria-busy="true" aria-live="polite">
-        <header className="panel-header">
-          <h2>正在检测平台状态</h2>
-          <p className="panel-desc">请稍候，正在连接本地基础设施。</p>
+      </aside>
+      <div className="app-main">
+        <header className="page-header">
+          <div>
+            <p className="eyebrow">Internal Developer Platform</p>
+            <h2>项目治理工作台</h2>
+          </div>
+          <div className="meta">
+            <span>正在加载</span>
+          </div>
         </header>
-        <div className="overall-row">
-          <span className="tone tone-loading" role="img" aria-label="检测中">
-            <span aria-hidden="true" className="dot" />
-            检测中
-          </span>
-        </div>
-      </section>
+        <section className="panel" aria-busy="true" aria-live="polite">
+          <header className="panel-header">
+            <h2>正在检测平台状态</h2>
+            <p className="panel-desc">正在连接本地基础设施。</p>
+          </header>
+          <div className="overall-row">
+            <span className="tone tone-loading" role="img" aria-label="检测中">
+              <span aria-hidden="true" className="dot" />
+              检测中
+            </span>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

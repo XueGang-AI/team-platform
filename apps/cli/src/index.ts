@@ -79,7 +79,7 @@ async function main(argv: string[]): Promise<void> {
 
 function parseOptions(args: string[]): CliOptions {
   const options: CliOptions = {
-    api: process.env.TEAM_PLATFORM_API ?? 'http://localhost:3001',
+    api: process.env.TEAM_PLATFORM_API ?? 'http://localhost:3201',
   };
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];

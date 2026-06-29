@@ -16,7 +16,7 @@
 
 ## 2. 当前项目目标
 
-构建团队统一项目治理平台。**当前阶段为 Phase 1.5（系统级目录架构审计与收敛），已完成。** 下一阶段为 Phase 2（项目注册与服务目录），由用户明确指令启动，不得自行进入。
+构建团队统一项目治理平台。当前本地控制面已覆盖项目注册、服务目录、健康检查、治理记录、发布、成本、权限凭证、接入与观测链接等工作区；Web/API 固定使用 `3200/3201`，Swagger 通过 Web 代理 `/api/platform/docs` 访问。生产界面只能展示真实 API、真实配置或明确空态，未接入控件必须禁用或说明原因，不得用演示数据冒充真实数据。
 
 ## 3. 当前架构
 
@@ -34,17 +34,17 @@
 ## 5. 技术栈
 
 | 维度 | 选型 | 锁定版本（Phase 1） |
-|------|------|------|
+| ---- | ---- | ------------------- |
 | Monorepo | pnpm workspace + Turborepo | pnpm 11.7.0 / Turbo 2.9.18 |
 | 管理后台 | Next.js + TypeScript | Next 16.2.9 / React 19.2.7 / TS 6.0.3 |
 | API | NestJS（Express adapter） | NestJS 11.1.27 |
-| 数据库 | PostgreSQL | postgres:16-alpine |
+| 数据库 | PostgreSQL | postgres:16-alpine（本地通用服务 `15432`） |
 | ORM | Prisma（driver adapter） | Prisma 7.8.0 + @prisma/adapter-pg |
-| 缓存/队列 | Redis | redis:7-alpine / ioredis 5.11.1 |
+| 缓存/队列 | Redis | redis:7-alpine / ioredis 5.11.1（本地通用服务 `16379`） |
 | 结构化日志 | pino + nestjs-pino | pino 10.3.1 / nestjs-pino 4.6.1 |
 | 配置校验 | zod | 4.4.3 |
 | 可观测性 | OpenTelemetry + Prometheus + Grafana + Loki + Tempo | Phase 4 引入 |
-| 本地基础设施 | Docker Compose | 仅 PG + Redis |
+| 本地基础设施 | Docker Compose | 默认可观测性骨架；`local-db` profile 可选启动项目专属 PG/Redis |
 | API 描述 | OpenAPI（Swagger） | @nestjs/swagger 11.4.4 |
 | 测试 | Jest + Playwright E2E | Jest 30.4.2 / Playwright 1.61.0 |
 
@@ -53,7 +53,7 @@
 ## 6. 命名规范
 
 - 项目 slug / 服务 slug：`^[a-z][a-z0-9-]{1,62}$`，小写 kebab-case；
-- 环境名：`dev` / `staging` / `prod` 或小写自定义；
+- 环境 slug：小写 kebab-case；本地示例项目使用 `local` 与 `docker`，不得继续制造同名 `docker-demo` 环境；
 - 代码标识符遵循各语言社区规范，与周围代码风格一致。
 
 ## 7. 安全规则
@@ -123,8 +123,8 @@
 
 ## 14. 阶段纪律
 
-- 每次只执行一个 Phase，不得跨阶段开发；
+- 每次只执行一个明确任务或交接范围，不得自行扩展产品目标；
 - 不得以静态页面、假数据或伪实现冒充完成；
 - 未真实执行验证不得声称通过；
-- 每阶段完成后必须停止并报告，等待下一条明确指令；
-- Phase 1.5 已完成，下一阶段为 Phase 2，由用户明确指令启动。
+- 每阶段或交接完成后必须停止并报告，等待下一条明确指令；
+- 历史 Phase 文档仍作为演进记录；当前增量开发以最新规划交接、验收标准和真实运行状态为准。

@@ -21,30 +21,41 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <main id="main" className="page">
-      <header className="page-header">
-        <h1>team-platform 管理后台</h1>
-        <div className="meta">
-          <span>
-            项目名称：<strong>team-platform</strong>
-          </span>
-          <span>
-            当前阶段：<strong>Phase 1 · 工程骨架与本地基础设施</strong>
-          </span>
+    <main id="main" className="app-shell">
+      <aside className="app-sidebar" aria-label="平台导航">
+        <div className="brand-block">
+          <span className="brand-mark">TP</span>
+          <div>
+            <h1>团队项目治理平台</h1>
+            <p>error</p>
+          </div>
         </div>
-      </header>
-      <section className="panel" role="alert">
-        <header className="panel-header">
-          <h2>页面无法加载</h2>
-          <p className="panel-desc">
-            管理后台初始化失败。常见原因：环境变量缺失或非法。 请检查 <code>.env</code> 中的{' '}
-            <code>WEB_API_BASE_URL</code>、<code>ENVIRONMENT</code> 等配置项后重试。
-          </p>
+      </aside>
+      <div className="app-main">
+        <header className="page-header">
+          <div>
+            <p className="eyebrow">Internal Developer Platform</p>
+            <h2>项目治理工作台</h2>
+          </div>
+          <div className="meta">
+            <span>
+              项目：<strong>team-platform</strong>
+            </span>
+          </div>
         </header>
-        <button type="button" onClick={reset} className="refresh-btn">
-          重试
-        </button>
-      </section>
+        <section className="panel" role="alert">
+          <header className="panel-header">
+            <h2>页面无法加载</h2>
+            <p className="panel-desc">
+              管理后台初始化失败。请检查 <code>.env</code> 中的 <code>WEB_API_BASE_URL</code>、{' '}
+              <code>ENVIRONMENT</code> 等配置项后重试。
+            </p>
+          </header>
+          <button type="button" onClick={reset} className="secondary-btn">
+            重试
+          </button>
+        </section>
+      </div>
     </main>
   );
 }

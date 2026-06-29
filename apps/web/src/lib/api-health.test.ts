@@ -45,14 +45,14 @@ describe('probeApiLiveness', () => {
     const live: LiveResponse = { status: 'ok', timestamp: '2026-06-17T00:00:00Z' };
     global.fetch = mockFetchOk(live) as unknown as typeof fetch;
 
-    const result = await probeApiLiveness('http://localhost:3001');
+    const result = await probeApiLiveness('http://localhost:3201');
 
     expect(result.name).toBe('api');
     expect(result.status).toBe('ok');
     expect(typeof result.latencyMs).toBe('number');
     expect(result.error).toBeUndefined();
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:3001/health/live',
+      'http://localhost:3201/health/live',
       expect.objectContaining({ cache: 'no-store' }),
     );
   });
@@ -60,7 +60,7 @@ describe('probeApiLiveness', () => {
   it('HTTP 非 2xx 时标记 unreachable', async () => {
     global.fetch = mockFetchStatus(503) as unknown as typeof fetch;
 
-    const result = await probeApiLiveness('http://localhost:3001');
+    const result = await probeApiLiveness('http://localhost:3201');
 
     expect(result.status).toBe('unreachable');
     expect(result.error).toContain('503');
@@ -75,7 +75,7 @@ describe('probeApiLiveness', () => {
       },
     }) as unknown as typeof fetch;
 
-    const result = await probeApiLiveness('http://localhost:3001');
+    const result = await probeApiLiveness('http://localhost:3201');
 
     expect(result.status).toBe('unreachable');
     expect(result.error).toContain('JSON');
@@ -84,7 +84,7 @@ describe('probeApiLiveness', () => {
   it('响应 status 非 ok 时标记 unreachable', async () => {
     global.fetch = mockFetchOk({ status: 'down' }) as unknown as typeof fetch;
 
-    const result = await probeApiLiveness('http://localhost:3001');
+    const result = await probeApiLiveness('http://localhost:3201');
 
     expect(result.status).toBe('unreachable');
   });
@@ -96,7 +96,7 @@ describe('probeApiLiveness', () => {
       return Promise.reject(abortError);
     }) as unknown as typeof fetch;
 
-    const result = await probeApiLiveness('http://localhost:3001');
+    const result = await probeApiLiveness('http://localhost:3201');
 
     expect(result.status).toBe('unreachable');
     expect(result.error).toContain('超时');
@@ -107,7 +107,7 @@ describe('probeApiLiveness', () => {
       .fn()
       .mockRejectedValue(new TypeError('fetch failed')) as unknown as typeof fetch;
 
-    const result = await probeApiLiveness('http://localhost:3001');
+    const result = await probeApiLiveness('http://localhost:3201');
 
     expect(result.status).toBe('unreachable');
     expect(result.error).toBe('fetch failed');
@@ -126,14 +126,14 @@ describe('probeDependencies', () => {
     };
     global.fetch = mockFetchOk(ready) as unknown as typeof fetch;
 
-    const deps = await probeDependencies('http://localhost:3001', ['postgres', 'redis']);
+    const deps = await probeDependencies('http://localhost:3201', ['postgres', 'redis']);
 
     expect(deps.postgres.status).toBe('ok');
     expect(deps.postgres.latencyMs).toBe(12);
     expect(deps.redis.status).toBe('ok');
     expect(deps.redis.latencyMs).toBe(3);
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:3001/health/ready',
+      'http://localhost:3201/health/ready',
       expect.objectContaining({ cache: 'no-store' }),
     );
   });
@@ -149,7 +149,7 @@ describe('probeDependencies', () => {
     };
     global.fetch = mockFetchOk(ready) as unknown as typeof fetch;
 
-    const deps = await probeDependencies('http://localhost:3001', ['postgres', 'redis']);
+    const deps = await probeDependencies('http://localhost:3201', ['postgres', 'redis']);
 
     expect(deps.postgres.status).toBe('ok');
     expect(deps.redis.status).toBe('degraded');
@@ -159,7 +159,7 @@ describe('probeDependencies', () => {
   it('API 不可达时所有依赖标记 unreachable', async () => {
     global.fetch = mockFetchStatus(500) as unknown as typeof fetch;
 
-    const deps = await probeDependencies('http://localhost:3001', ['postgres', 'redis']);
+    const deps = await probeDependencies('http://localhost:3201', ['postgres', 'redis']);
 
     expect(deps.postgres.status).toBe('unreachable');
     expect(deps.postgres.error).toContain('500');
@@ -174,7 +174,7 @@ describe('probeDependencies', () => {
     };
     global.fetch = mockFetchOk(ready) as unknown as typeof fetch;
 
-    const deps = await probeDependencies('http://localhost:3001', ['postgres', 'redis']);
+    const deps = await probeDependencies('http://localhost:3201', ['postgres', 'redis']);
 
     expect(deps.postgres.status).toBe('ok');
     expect(deps.redis.status).toBe('unreachable');
@@ -186,7 +186,7 @@ describe('probeDependencies', () => {
       .fn()
       .mockRejectedValue(new TypeError('fetch failed')) as unknown as typeof fetch;
 
-    const deps = await probeDependencies('http://localhost:3001', ['postgres', 'redis']);
+    const deps = await probeDependencies('http://localhost:3201', ['postgres', 'redis']);
 
     expect(deps.postgres.status).toBe('unreachable');
     expect(deps.redis.status).toBe('unreachable');

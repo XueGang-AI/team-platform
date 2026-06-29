@@ -16,7 +16,7 @@ team-platform 最终要做成一个面向团队多项目治理的通用内部平
 
 ## 2. 当前真实状态
 
-截至 2026-06-27，本仓库已具备：
+截至 2026-06-29，本仓库已具备：
 
 - pnpm workspace + Turborepo monorepo；
 - NestJS API，已接入配置校验、结构化日志、请求 ID、异常过滤、Prisma、Redis、健康检查、版本接口；
@@ -28,7 +28,7 @@ team-platform 最终要做成一个面向团队多项目治理的通用内部平
 - TypeScript SDK、Python SDK、CLI；
 - 单元测试、API 集成测试、Playwright E2E 测试结构；
 - 架构、领域模型、接入协议、路线图、安全原则、风险与 ADR 文档。
-- `pnpm platform:start` / `pnpm platform:stop` 本地总平台启动脚本，默认 Web 入口为 `http://localhost:3004`，API 上游为 `http://localhost:3005`。
+- `pnpm platform:start` / `pnpm platform:stop` 本地总平台启动脚本，默认 Web 入口为 `http://localhost:3200`，API 上游为 `http://localhost:3201`。
 
 当前已经形成最小可用闭环：
 
@@ -39,6 +39,7 @@ team-platform 最终要做成一个面向团队多项目治理的通用内部平
 - 多语言接入的 TS/Python SDK 与 CLI；
 - Phase 6-12 的告警、配置/密钥、发布、任务、文件/通知/功能开关、模型网关/成本、Prompt/评测以 `GovernanceRecord` 统一控制面承载，并提供专用治理 API、CLI/SDK 调用和管理后台治理总览；
 - `examples/project-manifests/manjv-studio.yaml` 与 `/Users/xuegang/Desktop/My Project/manjv-studio/project.yaml` 已作为真实项目接入样例。
+- 管理后台已完成真实性清理：项目目录只展示真实 API 返回项目；治理、发布、成本、观测无真实记录时展示真实空态；未接入控件禁用或说明原因；Swagger 文档通过 `/api/platform/docs` 外链进入真实 OpenAPI 页面。
 
 仍需外部配置才能启用的生产集成：
 
@@ -162,7 +163,7 @@ MVP 明确不做：
 - 校验 slug、枚举、必填字段、服务/环境/端点引用关系；
 - 将 labels 规范化为 tags；
 - 扫描疑似密钥、Token、含密码连接串；
-- apply 必须幂等：已存在则更新，缺失则创建，不自动删除未声明资源。
+- apply 必须幂等：已存在则更新，缺失则创建；同项目内 manifest 不再声明的服务和环境会软归档并从默认详情中隐藏，不物理删除历史资源。
 
 **健康检查范围**：
 

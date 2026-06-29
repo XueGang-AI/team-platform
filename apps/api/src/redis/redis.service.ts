@@ -20,7 +20,9 @@ export class RedisService implements OnModuleDestroy {
     if (!url) {
       throw new Error('REDIS_URL is required');
     }
+    const keyPrefix = config.get<string>('REDIS_KEY_PREFIX') ?? 'team_platform:';
     this.client = new Redis(url, {
+      keyPrefix,
       connectTimeout: 2000,
       maxRetriesPerRequest: 1,
       retryStrategy: (times) => (times > 3 ? null : Math.min(times * 100, 1000)),

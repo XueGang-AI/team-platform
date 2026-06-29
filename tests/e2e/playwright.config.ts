@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const webPort = process.env.E2E_WEB_PORT ?? '3000';
+const webPort = process.env.E2E_WEB_PORT ?? '3200';
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${webPort}`;
 
 /**
@@ -8,12 +8,13 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${webPort}`;
  *
  * ───────────────────────────────────────────────────────────────────────────
  * 前置条件（由主 Agent 统一编排，本配置不负责启动基础设施与 API）：
- *   1. docker compose up -d            → PostgreSQL :5433 + Redis :6380（宿主端口，避开本机冲突）
- *   2. pnpm --filter @team-platform/api start   → API :3001（需 DATABASE_URL / REDIS_URL）
- *   3. pnpm --filter @team-platform/web start   → Web :3000（需先 `pnpm --filter @team-platform/web build`）
- *   4. pnpm --filter @team-platform/e2e exec playwright install chromium
+ *   1. 通用 PostgreSQL :15432 + Redis :16379 已就绪
+ *   2. pnpm dev:infra                          → 启动可观测性组件
+ *   3. pnpm --filter @team-platform/api start  → API :3201（需 DATABASE_URL / REDIS_URL）
+ *   4. pnpm --filter @team-platform/web start  → Web :3200（需先 `pnpm --filter @team-platform/web build`）
+ *   5. pnpm --filter @team-platform/e2e exec playwright install chromium
  *
- * 如 3000 已被被接入项目占用，可设置 E2E_WEB_PORT=3004。
+ * 如 3200 已被其他服务占用，可设置 E2E_WEB_PORT 为临时 Web 端口。
  *
  * webServer 策略：
  *   - reuseExistingServer: true：主 Agent 已启动 Web 时，Playwright 仅做 URL 探测，不重复启动。

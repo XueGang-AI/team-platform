@@ -1,16 +1,21 @@
 import { getWebEnv } from '@/lib/env';
 import { ProjectRegistryDashboard } from '@/components/ProjectRegistryDashboard';
-import { StatusDashboard } from '@/components/StatusDashboard';
 import {
   Activity,
   Bell,
   BookOpen,
   Boxes,
+  ChevronDown,
   ClipboardList,
+  Circle,
+  CircleHelp,
+  CircleUserRound,
   Gauge,
   KeyRound,
   Rocket,
+  Search,
   Server,
+  Settings,
   WalletCards,
 } from 'lucide-react';
 
@@ -34,9 +39,12 @@ export default function HomePage() {
         <div className="brand-block">
           <span className="brand-mark">TP</span>
           <div>
-            <h1>团队项目治理平台</h1>
-            <p>{env.ENVIRONMENT}</p>
+            <h1>team-platform</h1>
+            <p>由邹开发 Admin</p>
           </div>
+          <span className="sidebar-collapse" aria-hidden="true">
+            «
+          </span>
         </div>
         <nav className="side-nav">
           <a href="#overview">
@@ -77,35 +85,85 @@ export default function HomePage() {
           </a>
         </nav>
         <div className="sidebar-links">
-          <a href="/api/platform/docs" target="_blank" rel="noreferrer">
+          <a href="/api/platform/docs">
             <BookOpen aria-hidden="true" />
             平台 API 文档
           </a>
-          <a href="http://localhost:3002" target="_blank" rel="noreferrer">
+          <a href="#observability">
             <Activity aria-hidden="true" />
             观测看板
           </a>
         </div>
+        <div className="sidebar-foot">
+          <div className="sidebar-foot-icons" aria-label="快捷工具">
+            <Bell aria-hidden="true" />
+            <BookOpen aria-hidden="true" />
+            <Activity aria-hidden="true" />
+            <Settings aria-hidden="true" />
+          </div>
+          <div className="sidebar-user">
+            <span>PA</span>
+            <div>
+              <strong>平台管理员</strong>
+              <small>Platform Admin</small>
+            </div>
+          </div>
+        </div>
       </aside>
 
       <div className="app-main">
-        <header className="page-header">
-          <div>
-            <p className="eyebrow">Internal Developer Platform</p>
-            <h2>项目治理工作台</h2>
-          </div>
-          <div className="meta">
-            <span>
-              项目：<strong>team-platform</strong>
+        <header className="top-toolbar" aria-label="全局工具栏">
+          <label className="global-search">
+            <Search aria-hidden="true" />
+            <input
+              placeholder="全局搜索暂未接入"
+              aria-label="全局搜索暂未接入"
+              disabled
+              title="请在项目目录内使用真实项目搜索"
+            />
+            <kbd>⌘K</kbd>
+          </label>
+          <div className="top-selectors">
+            <label>
+              项目
+              <select
+                aria-label="当前项目"
+                defaultValue="manjv-studio"
+                disabled
+                title="当前项目由工作台真实项目选择决定"
+              >
+                <option value="manjv-studio">Manjv Studio</option>
+              </select>
+            </label>
+            <label>
+              环境
+              <select
+                aria-label="当前环境"
+                defaultValue="local"
+                disabled
+                title="当前环境来自项目详情"
+              >
+                <option value="local">本地开发</option>
+              </select>
+            </label>
+            <span className="env-dot">
+              <Circle aria-hidden="true" />
+              {env.ENVIRONMENT}
             </span>
-            <span>
-              阶段：<strong>Phase 6-12 · 本地完整闭环</strong>
+          </div>
+          <div className="toolbar-icons" aria-label="全局操作">
+            <a href="#integration">快速入口</a>
+            <CircleHelp aria-hidden="true" />
+            <Settings aria-hidden="true" />
+            <span className="toolbar-avatar">
+              <CircleUserRound aria-hidden="true" />
+              PA
+              <ChevronDown aria-hidden="true" />
             </span>
           </div>
         </header>
 
         <ProjectRegistryDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
-        <StatusDashboard apiBaseUrl={env.WEB_API_BASE_URL} />
       </div>
     </main>
   );

@@ -7,6 +7,7 @@ import type { NextConfig } from 'next';
  * 同时禁用开发期 HMR 缓存，避免本地开发时拿到过期的 /health 响应。
  */
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['127.0.0.1'],
   experimental: {
     serverComponentsHmrCache: false,
   },

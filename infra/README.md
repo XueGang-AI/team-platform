@@ -5,23 +5,21 @@
 
 ## 范围
 
-本地基础设施包含控制面依赖与 Phase 4 可观测性数据面骨架：
+本地基础设施包含通用控制面依赖说明与 Phase 4 可观测性数据面骨架。默认 `docker compose up -d` 只启动可观测性组件，日常开发使用通用 PostgreSQL/Redis 服务。
 
 | 组件       | 镜像                 | 宿主端口 | 容器端口 | 数据卷                        | Healthcheck                                    |
 | ---------- | -------------------- | -------- | -------- | ----------------------------- | ---------------------------------------------- |
-| PostgreSQL | `postgres:16-alpine` | `5433`   | `5432`   | `team-platform-postgres-data` | `pg_isready -U team_platform -d team_platform` |
-| Redis      | `redis:7-alpine`     | `6380`   | `6379`   | `team-platform-redis-data`    | `redis-cli ping`                               |
-| OTel Collector | `otel/opentelemetry-collector-contrib` | `4317/4318/9464` | `4317/4318/9464` | - | - |
-| Prometheus | `prom/prometheus` | `9090` | `9090` | `team-platform-prometheus-data` | - |
-| Loki | `grafana/loki` | `3100` | `3100` | - | - |
-| Tempo | `grafana/tempo` | `3200/4319` | `3200/4317` | `team-platform-tempo-data` | - |
-| Grafana | `grafana/grafana` | `3002` | `3000` | `team-platform-grafana-data` | - |
+| PostgreSQL | 通用服务 | `15432` | - | - | - |
+| Redis      | 通用服务 | `16379` | - | - | - |
+| OTel Collector | `otel/opentelemetry-collector-contrib` | `3224/3225/3226` | `4317/4318/9464` | - | - |
+| Prometheus | `prom/prometheus` | `3221` | `3221` | `team-platform-prometheus-data` | - |
+| Loki | `grafana/loki` | `3222` | `3222` | - | - |
+| Tempo | `grafana/tempo` | `3223/3227` | `3223/4317` | `team-platform-tempo-data` | - |
+| Grafana | `grafana/grafana` | `3220` | `3220` | `team-platform-grafana-data` | - |
 
-> 宿主端口使用 5433/6380（容器内仍为 5432/6379），用于避开常见本机已安装的 PostgreSQL(5432) / Redis(6379) 占用冲突。CI 环境使用 GitHub Actions service container，端口为默认 5432/6379，无冲突。
+> PostgreSQL 使用 `127.0.0.1:15432/team_platform`，Redis 使用 `127.0.0.1:16379`，Redis 键前缀为 `team_platform:`。
 
-- 容器名：`team-platform-postgres`、`team-platform-redis`。
-- 两者均配置 `restart: unless-stopped` 与 healthcheck（间隔 5s，超时 5s，重试 10 次）。
-- Redis 启动命令为 `redis-server --save 60 1 --loglevel warning`（开启 RDB 持久化）。
+- 如需临时启用项目专属数据库容器，可执行 `docker compose --profile local-db up -d`；默认启动不会创建或暴露它们。除非专门调试隔离数据库，不建议使用该 profile。
 
 可观测性组件只作为外部数据面骨架提供，平台控制面只保存项目维度、跳转链接和治理元数据，不复制原始日志、指标和 Trace。
 
@@ -39,7 +37,7 @@ Tempo 本地容器使用 `user: '0'` 写入 `team-platform-tempo-data` 卷，避
 
 | 命令              | 等价操作               | 说明                             |
 | ----------------- | ---------------------- | -------------------------------- |
-| `pnpm dev:infra`  | `docker compose up -d` | 后台启动本地基础设施             |
+| `pnpm dev:infra`  | `docker compose up -d` | 后台启动本地可观测性组件             |
 | `pnpm stop:infra` | `docker compose down`  | 停止并移除容器（**保留数据卷**） |
 
 启动后可用 `docker compose ps` 查看状态，或 `docker compose logs -f` 跟随日志。
@@ -49,12 +47,14 @@ Tempo 本地容器使用 `user: '0'` 写入 `team-platform-tempo-data` 卷，避
 启动基础设施后，将根目录 [`.env.example`](../.env.example) 复制为 `.env` 并按需调整。本地连接串已内置占位值：
 
 ```dotenv
-DATABASE_URL=postgresql://team_platform:team_platform@localhost:5433/team_platform?schema=public
-REDIS_URL=redis://localhost:6380
+DATABASE_URL=postgresql://team_platform:team_platform@127.0.0.1:15432/team_platform?schema=public
+REDIS_URL=redis://127.0.0.1:16379
+REDIS_KEY_PREFIX=team_platform:
 ```
 
-- `DATABASE_URL`：控制面 PostgreSQL 主库，Prisma（schema 位于 `apps/api/prisma`）与 API 运行时使用。`compose.yaml` 的 `POSTGRES_DB=team_platform` 会自动创建该库。
-- `REDIS_URL`：本地 Redis。
+- `DATABASE_URL`：控制面 PostgreSQL 主库，Prisma（schema 位于 `apps/api/prisma`）与 API 运行时使用。
+- `REDIS_URL`：通用 Redis。
+- `REDIS_KEY_PREFIX`：当前项目的 Redis 键前缀，避免与其他项目共用 Redis 时互相污染。
 
 > 集成测试连接 `DATABASE_URL` 指向的 `team_platform` 主库，不使用独立测试库。如需隔离测试数据可再增加 `TEST_DATABASE_URL` 与独立测试库。
 
@@ -64,12 +64,12 @@ REDIS_URL=redis://localhost:6380
 
 ## 数据持久化与清理
 
-PostgreSQL 与 Redis 的数据分别持久化到命名数据卷：
+仅在启用 `local-db` profile 时，项目专属 PostgreSQL 与 Redis 数据会分别持久化到命名数据卷：
 
 - `team-platform-postgres-data`
 - `team-platform-redis-data`
 
-`pnpm stop:infra`（`docker compose down`）**只移除容器，保留数据卷**，下次启动数据仍在。
+`pnpm stop:infra`（`docker compose down`）**只移除容器，保留数据卷**，下次启用相同 profile 时数据仍在。日常默认模式使用通用 PostgreSQL/Redis 服务，不依赖这些项目专属数据卷。
 
 > **破坏性操作警告**：`docker compose down -v` 会**同时删除数据卷**，PostgreSQL 与 Redis 中的所有本地数据将被永久清除且不可恢复。仅在需要重置本地环境时使用，执行前务必确认无需保留的数据。本阶段不提供数据备份脚本。
 

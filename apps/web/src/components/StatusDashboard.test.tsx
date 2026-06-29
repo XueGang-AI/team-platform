@@ -45,7 +45,7 @@ describe('statusLabel', () => {
 });
 
 describe('StatusDashboard 初始渲染', () => {
-  const markup = renderToStaticMarkup(<StatusDashboard apiBaseUrl="http://localhost:3001" />);
+  const markup = renderToStaticMarkup(<StatusDashboard apiBaseUrl="http://localhost:3201" />);
 
   it('展示 Web/API/PostgreSQL/Redis 四个真实组件项', () => {
     expect(markup).toContain('管理后台 (Web)');

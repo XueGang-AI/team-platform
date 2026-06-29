@@ -4,17 +4,18 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-API_PORT="${API_PORT:-3005}"
-WEB_PORT="${WEB_PORT:-3004}"
+API_PORT="${API_PORT:-3201}"
+WEB_PORT="${WEB_PORT:-3200}"
 API_HOST="${API_HOST:-0.0.0.0}"
 ENVIRONMENT="${ENVIRONMENT:-dev}"
 LOG_LEVEL="${LOG_LEVEL:-info}"
-DATABASE_URL="${DATABASE_URL:-postgresql://team_platform:team_platform@localhost:5433/team_platform?schema=public}"
-REDIS_URL="${REDIS_URL:-redis://localhost:6380}"
+DATABASE_URL="${DATABASE_URL:-postgresql://team_platform:team_platform@127.0.0.1:15432/team_platform?schema=public}"
+REDIS_URL="${REDIS_URL:-redis://127.0.0.1:16379}"
+REDIS_KEY_PREFIX="${REDIS_KEY_PREFIX:-team_platform:}"
 AUTH_TOKEN_SECRET="${AUTH_TOKEN_SECRET:-team-platform-local-dev-secret}"
 WEB_API_BASE_URL="${WEB_API_BASE_URL:-/api/platform}"
 PLATFORM_API_INTERNAL_URL="${PLATFORM_API_INTERNAL_URL:-http://localhost:${API_PORT}}"
-HEALTH_CHECK_ALLOWED_HOSTS="${HEALTH_CHECK_ALLOWED_HOSTS:-localhost:3000,localhost:3001,localhost:3004,localhost:3005,127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3004,127.0.0.1:3005}"
+HEALTH_CHECK_ALLOWED_HOSTS="${HEALTH_CHECK_ALLOWED_HOSTS:-localhost:3100,localhost:3201}"
 
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -80,6 +81,7 @@ DATABASE_URL="$DATABASE_URL" \
 if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
   DATABASE_URL="$DATABASE_URL" \
   REDIS_URL="$REDIS_URL" \
+  REDIS_KEY_PREFIX="$REDIS_KEY_PREFIX" \
   AUTH_TOKEN_SECRET="$AUTH_TOKEN_SECRET" \
   WEB_API_BASE_URL="$WEB_API_BASE_URL" \
   PLATFORM_API_INTERNAL_URL="$PLATFORM_API_INTERNAL_URL" \
@@ -99,6 +101,7 @@ screen -dmS team-platform-api bash -lc "
   cd \"$ROOT_DIR\" &&
   DATABASE_URL=\"$DATABASE_URL\" \
   REDIS_URL=\"$REDIS_URL\" \
+  REDIS_KEY_PREFIX=\"$REDIS_KEY_PREFIX\" \
   HEALTH_CHECK_ALLOWED_HOSTS=\"$HEALTH_CHECK_ALLOWED_HOSTS\" \
   AUTH_TOKEN_SECRET=\"$AUTH_TOKEN_SECRET\" \
   NODE_ENV=production \

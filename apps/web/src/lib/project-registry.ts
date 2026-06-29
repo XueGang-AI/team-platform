@@ -49,7 +49,7 @@ async function fetchJson<T>(url: string, init?: RequestInit, token?: string | nu
     });
     const body = (await res.json().catch(() => null)) as unknown;
     if (!res.ok) {
-      const error = extractError(body);
+      const error = extractError(body, res.status);
       throw new ApiClientError(error.message, res.status, error.code);
     }
     return body as T;
@@ -77,15 +77,15 @@ export async function login(
   });
 }
 
-function extractError(body: unknown): { message: string; code?: string } {
+function extractError(body: unknown, status: number): { message: string; code?: string } {
   if (body && typeof body === 'object' && 'error' in body) {
     const error = (body as { error?: { message?: unknown; code?: unknown } }).error;
     return {
-      message: typeof error?.message === 'string' ? error.message : '请求失败',
+      message: typeof error?.message === 'string' ? error.message : `请求失败（HTTP ${status}）`,
       code: typeof error?.code === 'string' ? error.code : undefined,
     };
   }
-  return { message: '请求失败' };
+  return { message: `请求失败（HTTP ${status}）` };
 }
 
 export function buildProjectQuery(query: ProjectListQuery): string {

@@ -48,7 +48,7 @@ flowchart LR
 - **核心交付物**：pnpm workspace + Turborepo 结构、NestJS API（健康检查/版本/请求 ID/结构化日志/配置校验/OpenAPI/CORS/优雅关闭/PG/Redis 连接）、Next.js 管理后台（真实状态展示 + 降级）、Prisma 7 driver adapter 基础、Docker Compose（仅 PG+Redis）、GitHub Actions CI、单元 + 集成 + Playwright E2E 测试。
 - **验收标准**：`docker compose up` 起基础设施；API 与 Web 可启动；live/ready/version 真实工作；依赖失败正确降级；lint/typecheck/test/integration/build/E2E 全通过；CI workflow 已创建。
 - **不做什么**：不实现业务模块、不做登录、不做可观测性组件（Loki/Prometheus/Tempo/Grafana 在 Phase 4）。
-- **主要风险**：依赖版本选择不当 → 已通过官方文档验证锁定；本机已安装的 PG/Redis 占用 5432/6379 → Docker 宿主端口改用 5433/6380 避开冲突。
+- **主要风险**：依赖版本选择不当 → 已通过官方文档验证锁定；本机已安装的 PG/Redis 占用 5432/6379 → Docker 宿主端口改用 15432/16379 避开冲突。
 
 ## Phase 1.5：系统级目录架构审计与收敛（已完成）
 
